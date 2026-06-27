@@ -1,0 +1,312 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style="width: 1280px; height: 1024px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>文件 - 创作者空间</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#c8f17a",
+                        "on-background": "#1a1c1b",
+                        "on-surface-variant": "#43474c",
+                        "background": "#faf9f7",
+                        "on-tertiary-fixed": "#291802",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#364e00",
+                        "on-primary-container": "#96a9be",
+                        "outline-variant": "#c4c6cd",
+                        "tertiary-fixed": "#ffddb7",
+                        "on-primary": "#ffffff",
+                        "primary": "#162839",
+                        "inverse-primary": "#b5c8df",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-secondary-container": "#4e6e00",
+                        "primary-fixed": "#d1e4fb",
+                        "secondary": "#496800",
+                        "surface-dim": "#dadad8",
+                        "outline": "#74777d",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f1f1ef",
+                        "primary-container": "#2c3e50",
+                        "surface-bright": "#faf9f7",
+                        "tertiary-container": "#4e381c",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "tertiary": "#362308",
+                        "inverse-surface": "#2f3130",
+                        "on-tertiary-container": "#c1a17d",
+                        "on-surface": "#1a1c1b",
+                        "on-primary-fixed-variant": "#36485b",
+                        "surface-container-high": "#e9e8e6",
+                        "surface-container-low": "#f4f3f1",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-primary-fixed": "#091d2e",
+                        "primary-fixed-dim": "#b5c8df",
+                        "secondary-fixed-dim": "#add461",
+                        "surface-tint": "#4e6073",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container": "#efeeec",
+                        "surface": "#faf9f7",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#131f00",
+                        "secondary-fixed": "#c8f17a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section_margin": "48px",
+                        "sidebar_width": "260px",
+                        "safe_padding": "32px",
+                        "container_max_width": "1200px",
+                        "stack_sm": "8px",
+                        "grid_gutter": "24px",
+                        "stack_md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-reading": ["Source Serif 4"],
+                        "body-ui": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "display-title": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-reading": ["18px", {"lineHeight": "30px", "fontWeight": "400"}],
+                        "body-ui": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "display-title": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .book-card-shadow:hover {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .mobile-sidebar-hidden { transform: translateX(-100%); }
+            .mobile-sidebar-visible { transform: translateX(0); }
+        }
+        .sketch-pill {
+            border-radius: 9999px;
+            border: 1.5px solid #74777d;
+        }
+    </style>
+</head>
+<body class="font-body-ui text-on-surface">
+<!-- Mobile Navigation Overlay -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden md:hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Navigation Drawer -->
+<aside class="w-sidebar_width h-full fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 flex flex-col sidebar-transition mobile-sidebar-hidden md:mobile-sidebar-visible" id="mainSidebar">
+<div class="p-safe_padding flex flex-col h-full">
+<!-- Profile Header -->
+<div class="mb-10 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex-shrink-0">
+<img alt="用户xx" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_2S26CmmY5cUt1KXjirN8p-ZuxUgyNLY6zDfMQzZ9NdbXgqDOTFSjsauSHN2X7dYPod5H3qNv9fSREwgRyRJWOZEOx-RSQwHSbCIHXIVf-ekcLWawE2iU24QJeLZcxbXH_s0RD3h9BW2MgIX4cQIuE5QNhCmcncnY7WzUysn0iDtYvlIFqTtQ3aFCzgn0mJlVDFuAh1gHken3nF2Nt38ONT0jbx3yavmOB-2WLRqwzPSGy79HAjZdVsVW0T6s56_xl_8PkhYySPAVGfo">
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface truncate">用户XX</h3>
+</div>
+<!-- Nav Links -->
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined" data-icon="edit">edit</span><span class="text-body-ui">写作</span></a>
+<a class="flex items-center gap-4 px-4 py-3 bg-surface-container-high text-primary font-bold border-l-4 border-secondary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="folder">folder</span>
+<span class="text-body-ui">文件</span>
+</a><a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span><span class="text-body-ui">素材</span></a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-body-ui">统计</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-body-ui">设置</span>
+</a>
+</nav>
+<!-- Recently Uploaded Section -->
+<div class="pt-6 border-t border-outline-variant">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="text-body-ui">上传云端</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Fluid Canvas -->
+<main class="md:ml-[260px] min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-30 w-full px-4 md:px-8 py-3 bg-background/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="max-w-container_max_width mx-auto flex items-center gap-6">
+<!-- Hamburger Menu for Mobile -->
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-opacity duration-200" onclick="toggleSidebar()">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<!-- Pill Search Bar -->
+<div class="relative flex-1 max-w-2xl mx-auto">
+<div class="flex items-center sketch-pill bg-white px-4 py-1.5 shadow-sm">
+<span class="material-symbols-outlined text-outline mr-2" style="font-size: 20px;">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-body-ui outline-none" placeholder="开始查找" type="text">
+</div>
+</div>
+<!-- Right Side Icons -->
+<div class="flex items-center gap-1 md:gap-4 text-on-surface-variant">
+
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">delete</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">history</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">more_vert</span></button>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 px-4 md:px-8 py-8 md:py-10 max-w-container_max_width mx-auto w-full">
+<!-- Page Header Update -->
+<div class="flex flex-col md:flex-row md:items-start justify-between mb-8 gap-6">
+<div>
+<h1 class="font-display-title text-[48px] text-on-background mb-3">管理你的文件</h1>
+<!-- Statistics Row -->
+<div class="flex flex-wrap gap-8 items-center text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">文件</span>
+<span class="font-bold text-primary">12</span>
+</div>
+<div class="w-px h-3 bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">文本</span>
+<span class="font-bold text-primary">148</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-6 md:flex-row md:items-center">
+<div class="flex flex-col items-end">
+<span class="text-label-caps text-outline uppercase tracking-widest">上次修改</span>
+<span class="text-xs text-on-surface-variant italic">第一章 森林的呼唤...</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center gap-2 px-8 py-2.5 bg-primary text-white sketch-pill font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="">新建文件</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors" title="布局排列">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bookshelf Grid -> Folders Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-grid_gutter">
+<!-- Folder Card 1 -->
+<div class="flex flex-col group cursor-pointer h-full">
+<div class="w-full flex items-center justify-center transition-all duration-300">
+<span class="material-symbols-outlined text-[180px] text-primary group-hover:text-secondary transition-all duration-300 group-hover:scale-105" style="font-variation-settings: &quot;FILL&quot; 1, &quot;wght&quot; 300;">folder</span>
+</div>
+<div class="px-1 -mt-4">
+<p class="font-body-ui font-bold text-on-surface truncate">创作一号</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">12 FILES</p>
+</div>
+</div>
+<!-- Folder Card 2 -->
+<div class="flex flex-col group cursor-pointer h-full">
+<div class="w-full flex items-center justify-center transition-all duration-300">
+<span class="material-symbols-outlined text-[180px] text-primary group-hover:text-secondary transition-all duration-300 group-hover:scale-105" style="font-variation-settings: &quot;FILL&quot; 1, &quot;wght&quot; 300;">folder</span>
+</div>
+<div class="px-1 -mt-4">
+<p class="font-body-ui font-bold text-on-surface truncate">诗集草稿</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">4 FILES</p>
+</div>
+</div>
+<!-- Folder Card 3 -->
+<div class="flex flex-col group cursor-pointer h-full">
+<div class="w-full flex items-center justify-center transition-all duration-300">
+<span class="material-symbols-outlined text-[180px] text-primary group-hover:text-secondary transition-all duration-300 group-hover:scale-105" style="font-variation-settings: &quot;FILL&quot; 1, &quot;wght&quot; 300;">folder</span>
+</div>
+<div class="px-1 -mt-4">
+<p class="font-body-ui font-bold text-on-surface truncate">书籍(3)</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">8 FILES</p>
+</div>
+</div>
+<!-- "Create New File" Card -->
+<div class="flex flex-col group cursor-pointer h-full">
+<div class="w-full flex items-center justify-center transition-all duration-300"><span class="material-symbols-outlined text-[180px] text-outline group-hover:text-primary transition-all duration-300 group-hover:scale-105" style="font-variation-settings: &quot;FILL&quot; 0, &quot;wght&quot; 200;">create_new_folder</span></div>
+<div class="px-1 -mt-4"><p class="font-body-ui font-bold text-on-surface truncate">新建文件</p><p class="text-label-caps text-outline uppercase tracking-widest mt-1">NEW</p></div></div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-background border-t border-outline-variant px-2 z-50 rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<span class="text-[10px] mt-1">创作</span>
+</a>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] mt-1">新建</span>
+</button>
+<a class="flex flex-col items-center justify-center text-primary font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="folder">folder</span>
+<span class="text-[10px] mt-1">文件</span>
+</a><a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#"><span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span><span class="text-[10px] mt-1">素材</span></a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] mt-1">设置</span>
+</a>
+</nav>
+<script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('mobile-sidebar-hidden')) {
+                sidebar.classList.remove('mobile-sidebar-hidden');
+                sidebar.classList.add('mobile-sidebar-visible');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('mobile-sidebar-hidden');
+                sidebar.classList.remove('mobile-sidebar-visible');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Search Input focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            const pill = searchInput.closest('.sketch-pill');
+            pill.classList.add('border-primary');
+            pill.classList.add('ring-1');
+            pill.classList.add('ring-primary/20');
+        });
+        searchInput.addEventListener('blur', () => {
+            const pill = searchInput.closest('.sketch-pill');
+            pill.classList.remove('border-primary');
+            pill.classList.remove('ring-1');
+            pill.classList.remove('ring-primary/20');
+        });
+    </script>
+
+
+<div id="snapdom-sandbox" data-snapdom-sandbox="true" aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px; width: 0px; height: 0px; overflow: hidden;"></div>
+
+</body></html>

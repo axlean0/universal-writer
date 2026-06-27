@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter --version)",
+      "Bash(flutter create *)",
+      "Bash(flutter pub *)",
+      "Bash(mkdir -p \"e:/ty002/lib/theme\" \"e:/ty002/lib/models\" \"e:/ty002/lib/pages\" \"e:/ty002/lib/widgets\" && echo \"dirs created\")",
+      "Bash(flutter analyze *)",
+      "Bash(flutter run *)",
+      "Bash(python3 -c ' *)",
+      "Bash(unzip -p \"文件界面/文件界面结构书.docx\" word/document.xml)",
+      "Bash(grep -v '^$')",
+      "Bash(unzip -p \"素材界面/素材界面结构书.docx\" word/document.xml)",
+      "Bash(unzip -p \"统计界面/统计界面结构书.docx\" word/document.xml)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ],
+    "additionalDirectories": [
+      "e:\\ty002\\lib"
+    ]
+  }
+}

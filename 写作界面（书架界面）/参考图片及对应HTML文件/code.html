@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>书架 - 创作者空间</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#c8f17a",
+                        "on-background": "#1a1c1b",
+                        "on-surface-variant": "#43474c",
+                        "background": "#faf9f7",
+                        "on-tertiary-fixed": "#291802",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#364e00",
+                        "on-primary-container": "#96a9be",
+                        "outline-variant": "#c4c6cd",
+                        "tertiary-fixed": "#ffddb7",
+                        "on-primary": "#ffffff",
+                        "primary": "#162839",
+                        "inverse-primary": "#b5c8df",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-secondary-container": "#4e6e00",
+                        "primary-fixed": "#d1e4fb",
+                        "secondary": "#496800",
+                        "surface-dim": "#dadad8",
+                        "outline": "#74777d",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f1f1ef",
+                        "primary-container": "#2c3e50",
+                        "surface-bright": "#faf9f7",
+                        "tertiary-container": "#4e381c",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "tertiary": "#362308",
+                        "inverse-surface": "#2f3130",
+                        "on-tertiary-container": "#c1a17d",
+                        "on-surface": "#1a1c1b",
+                        "on-primary-fixed-variant": "#36485b",
+                        "surface-container-high": "#e9e8e6",
+                        "surface-container-low": "#f4f3f1",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-primary-fixed": "#091d2e",
+                        "primary-fixed-dim": "#b5c8df",
+                        "secondary-fixed-dim": "#add461",
+                        "surface-tint": "#4e6073",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container": "#efeeec",
+                        "surface": "#faf9f7",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#131f00",
+                        "secondary-fixed": "#c8f17a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section_margin": "48px",
+                        "sidebar_width": "260px",
+                        "safe_padding": "32px",
+                        "container_max_width": "1200px",
+                        "stack_sm": "8px",
+                        "grid_gutter": "24px",
+                        "stack_md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-reading": ["Source Serif 4"],
+                        "body-ui": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "display-title": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-reading": ["18px", {"lineHeight": "30px", "fontWeight": "400"}],
+                        "body-ui": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "display-title": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .book-card-shadow:hover {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .mobile-sidebar-hidden { transform: translateX(-100%); }
+            .mobile-sidebar-visible { transform: translateX(0); }
+        }
+        .sketch-pill {
+            border-radius: 9999px;
+            border: 1.5px solid #74777d;
+        }
+        .dropdown-panel {
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+        .batch-bar-animation {
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .batch-bar-visible {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-body-ui text-on-surface">
+<!-- Overlay for Dropdowns -->
+<div class="fixed inset-0 z-40 hidden" id="globalOverlay" onclick="closeAllPanels()"></div>
+<!-- Mobile Navigation Overlay -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden md:hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Navigation Drawer -->
+<aside class="w-sidebar_width h-full fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 flex flex-col sidebar-transition mobile-sidebar-hidden md:mobile-sidebar-visible" id="mainSidebar">
+<div class="p-safe_padding flex flex-col h-full">
+<!-- Profile Header -->
+<div class="mb-10 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex-shrink-0">
+<img alt="用户xx" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_tZfsqDWteYGTr1hNxF4CQe4k2oBy_S2ws0Zi5SmEkQWg3-xEfG8wrdwkjy7OBnqwLk2c4uJKAijQr_QIGWSM5cYVV1EskN8YSloIwDJ5iLPIwB7K0WJUZerpl0zsD7nJjslyObrI25QnSSlVllVBeexpUUd4herD0k73alwm1dyCQmaGGfM7-a0XkV6JkpOgpmr6FNkXp0qEhAxFVJ-csZPhK5RB2cfoY5PcjzlQpdTnUftk-ExDjFLnyRHn7JirJP1nfk5JmrJH4as"/>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface truncate">用户XX</h3>
+</div>
+<!-- Nav Links -->
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 bg-surface-container-high text-primary font-bold border-l-4 border-secondary transition-colors duration-200" href="#"><span class="material-symbols-outlined" data-icon="edit">edit</span><span class="text-body-ui">写作</span></a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="folder">folder</span>
+<span class="text-body-ui">文件</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-body-ui">素材</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-body-ui">统计</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-body-ui">设置</span>
+</a>
+</nav>
+<!-- Recently Uploaded Section -->
+<div class="pt-6 border-t border-outline-variant">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="text-body-ui">上传云端</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Fluid Canvas -->
+<main class="md:ml-[260px] min-h-screen flex flex-col pb-24">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-30 w-full px-4 md:px-8 py-3 bg-background/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="max-w-container_max_width mx-auto flex items-center gap-6 relative">
+<!-- Hamburger Menu for Mobile -->
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-opacity duration-200" onclick="toggleSidebar()">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<!-- Pill Search Bar & Search Panel -->
+<div class="relative flex-1 max-w-2xl mx-auto group">
+<div class="flex items-center sketch-pill bg-white px-4 py-1.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-outline mr-2" style="font-size: 20px;">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-body-ui outline-none" id="globalSearchInput" onfocus="toggleSearchPanel(true)" placeholder="开始查找" type="text"/>
+</div>
+<!-- Deep Search Panel -->
+<div class="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-outline-variant dropdown-panel z-50 hidden" id="searchPanel">
+<div class="p-4 border-b border-outline-variant">
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-bold transition-colors">全部</button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors">作品 <span class="opacity-60 ml-1">12</span></button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors">正文 <span class="opacity-60 ml-1">45</span></button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors">大纲 <span class="opacity-60 ml-1">8</span></button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors">卡片 <span class="opacity-60 ml-1">128</span></button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors">图谱</button>
+</div>
+</div>
+<div class="max-h-[400px] overflow-y-auto p-2">
+<!-- Search Result Mockups -->
+<div class="p-3 hover:bg-surface-container-low rounded-lg flex items-center justify-between group/item cursor-pointer">
+<div>
+<p class="text-sm font-bold text-primary">《<span class="bg-secondary-container/50">森林</span>的呼唤》</p>
+<p class="text-xs text-outline mt-1 line-clamp-1">第一章：在那片被迷雾笼罩的<span class="bg-secondary-container/50">森林</span>深处...</p>
+</div>
+<button class="p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity text-secondary">
+<span class="material-symbols-outlined text-[20px]">near_me</span>
+</button>
+</div>
+<div class="p-3 hover:bg-surface-container-low rounded-lg flex items-center justify-between group/item cursor-pointer">
+<div>
+<p class="text-sm font-bold text-primary">素材：<span class="bg-secondary-container/50">森林</span>地貌考究</p>
+<p class="text-xs text-outline mt-1">创建于 2023-10-15</p>
+</div>
+<button class="p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity text-secondary">
+<span class="material-symbols-outlined text-[20px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side Icons -->
+<div class="flex items-center gap-1 md:gap-4 text-on-surface-variant">
+<div class="relative">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors" onclick="toggleTrashPanel()">
+<span class="material-symbols-outlined" style="font-size: 22px;">delete</span>
+</button>
+<!-- Trash Panel -->
+<div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl border border-outline-variant dropdown-panel z-50 hidden" id="trashPanel">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low/30">
+<h4 class="font-bold text-sm text-primary">回收站</h4>
+<div class="flex items-center gap-1 text-[10px] text-outline">
+<span>自动清理: 30天</span>
+<div class="flex flex-col">
+<button class="hover:text-primary"><span class="material-symbols-outlined text-[12px] leading-[6px]">expand_less</span></button>
+<button class="hover:text-primary"><span class="material-symbols-outlined text-[12px] leading-[6px]">expand_more</span></button>
+</div>
+</div>
+</div>
+<div class="max-h-80 overflow-y-auto">
+<div class="p-4 flex items-center justify-between hover:bg-error/5 group/trash">
+<div>
+<p class="text-sm font-medium">被废弃的大纲 V2</p>
+<p class="text-[10px] text-outline">删除于 3天前</p>
+</div>
+<div class="flex gap-1">
+<button class="p-1.5 hover:text-secondary rounded-lg" title="还原"><span class="material-symbols-outlined text-[18px]">restore_from_trash</span></button>
+<button class="p-1.5 hover:text-error rounded-lg" onclick="confirmDelete(this)" title="彻底删除"><span class="material-symbols-outlined text-[18px]">delete_forever</span></button>
+</div>
+</div>
+</div>
+<div class="p-3 border-t border-outline-variant bg-surface-container-lowest text-center">
+<button class="text-xs text-outline hover:text-error transition-colors">清空回收站</button>
+</div>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined" style="font-size: 22px;">history</span></button>
+<div class="relative">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors" onclick="toggleMoreMenu()">
+<span class="material-symbols-outlined" style="font-size: 22px;">more_vert</span>
+</button>
+<!-- More Options Menu -->
+<div class="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl border border-outline-variant dropdown-panel z-50 py-2 hidden" id="moreMenu">
+<!-- Sort Section -->
+<div class="px-4 py-2 text-label-caps text-outline border-b border-outline-variant mb-1">排序</div>
+<div class="px-2 space-y-0.5">
+<button class="w-full flex items-center justify-between px-3 py-2 hover:bg-surface-container-low rounded-lg text-sm text-on-surface">
+<span>名称 A-Z</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+</button>
+<button class="w-full flex items-center justify-between px-3 py-2 hover:bg-surface-container-low rounded-lg text-sm text-on-surface-variant">
+<span>最近编辑</span>
+</button>
+<button class="w-full flex items-center justify-between px-3 py-2 hover:bg-surface-container-low rounded-lg text-sm text-on-surface-variant">
+<span>字数最多</span>
+</button>
+</div>
+<!-- Manage Section -->
+<div class="px-4 py-2 text-label-caps text-outline border-y border-outline-variant my-2">管理</div>
+<div class="px-2 space-y-0.5">
+<button class="w-full flex items-center gap-3 px-3 py-2 hover:bg-surface-container-low rounded-lg text-sm text-on-surface" onclick="toggleBatchMode()">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+<span>批量管理</span>
+</button>
+<div class="relative group/disabled">
+<button class="w-full flex items-center gap-3 px-3 py-2 text-sm text-outline cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span>管理分组</span>
+</button>
+<div class="absolute right-full top-0 mr-2 bg-inverse-surface text-white text-[10px] py-1 px-2 rounded hidden group-hover/disabled:block whitespace-nowrap">请切换视图模式</div>
+</div>
+</div>
+<!-- Import Section -->
+<div class="px-4 py-2 text-label-caps text-outline border-y border-outline-variant my-2">导入</div>
+<div class="px-4 py-3">
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer group/upload">
+<span class="material-symbols-outlined text-outline group-hover/upload:text-primary mb-1">upload_file</span>
+<p class="text-[10px] text-outline">支持 txt, epub, pdf, docx</p>
+</div>
+<div class="mt-3">
+<select class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-1.5 text-xs text-on-surface-variant focus:ring-1 focus:ring-primary outline-none">
+<option>关联到：未分类</option>
+<option>关联到：长篇小说</option>
+<option>关联到：灵感随笔</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 px-4 md:px-8 py-8 md:py-10 max-w-container_max_width mx-auto w-full relative">
+<!-- Page Header Update -->
+<div class="flex flex-col md:flex-row md:items-start justify-between mb-8 gap-6">
+<div>
+<h1 class="font-display-title text-[48px] text-on-background mb-3">欢迎回来，创作者</h1>
+<!-- Statistics Row -->
+<div class="flex flex-wrap gap-8 items-center text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">作品</span>
+<span class="font-bold text-primary">12</span>
+</div>
+<div class="w-px h-3 bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">总字数</span>
+<span class="font-bold text-primary">45,620</span>
+</div>
+<div class="w-px h-3 bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">今日</span>
+<span class="font-bold text-primary">1,240</span>
+</div>
+<div class="w-px h-3 bg-outline-variant"></div>
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-outline uppercase tracking-wider">连续</span>
+<span class="font-bold text-primary">8 天</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-6 md:flex-row md:items-center">
+<div class="flex flex-col items-end">
+<span class="text-label-caps text-outline uppercase tracking-widest">上次编辑</span>
+<span class="text-xs text-on-surface-variant italic">第一章 森林的呼唤...</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center gap-2 px-8 py-2.5 bg-primary text-white sketch-pill font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="">新创作</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors" title="布局排列">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bookshelf Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-grid_gutter relative" id="bookshelfGrid">
+<!-- Book Card 1 -->
+<div class="flex flex-col group cursor-pointer relative">
+<!-- Checkbox for Batch Mode -->
+<div class="absolute top-3 left-3 z-10 hidden batch-checkbox">
+<div class="w-6 h-6 rounded-lg bg-white border-2 border-outline flex items-center justify-center group-hover:border-primary">
+<div class="w-3 h-3 bg-primary rounded-sm opacity-0 checked-indicator"></div>
+</div>
+</div>
+<div class="aspect-[2/3] w-full bg-white border border-outline-variant rounded-lg overflow-hidden book-card-shadow transition-all duration-300 flex items-center justify-center relative p-8">
+<div class="absolute inset-0 bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<h2 class="text-display-title font-body-reading text-primary text-center leading-tight">创作一号</h2>
+<div class="absolute bottom-6 left-6 right-6">
+<div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-2/3"></div>
+</div>
+</div>
+</div>
+<div class="mt-stack_md px-1">
+<p class="font-body-ui font-bold text-on-surface truncate">创作一号</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">12,450 WORDS</p>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="flex flex-col group cursor-pointer relative">
+<div class="absolute top-3 left-3 z-10 hidden batch-checkbox">
+<div class="w-6 h-6 rounded-lg bg-white border-2 border-outline flex items-center justify-center group-hover:border-primary">
+<div class="w-3 h-3 bg-primary rounded-sm opacity-0 checked-indicator"></div>
+</div>
+</div>
+<div class="aspect-[2/3] w-full bg-white border border-outline-variant rounded-lg overflow-hidden book-card-shadow transition-all duration-300">
+<img alt="Poetry Collection" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEt6XGFNmA4IvvlcSkrk99VlCTzOSjw0aBuvD7potkCPETRYbAluIFqnkXYKv2igVQ2yOyQdZtWiLYvYTjVEWBxsuvagkEd-NRHI2S7Mf35diWiHB4b2BihnenkHKIkvsE8TKrdH4UegZeSaxZ1M-0xjht6jG8kGFmAZ7nr9_nQofZMda3EdNOi7mL_kyWNMOWzJ_2eIhzxDvZtlQtFKS3KRTQCsI8vd0bTmFj62A39WGiR6m2RB-0etyGT93NkwEremR0h_T2WcMK"/>
+</div>
+<div class="mt-stack_md px-1">
+<p class="font-body-ui font-bold text-on-surface truncate">诗集草稿</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">4,200 WORDS</p>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="flex flex-col group cursor-pointer relative">
+<div class="absolute top-3 left-3 z-10 hidden batch-checkbox">
+<div class="w-6 h-6 rounded-lg bg-white border-2 border-outline flex items-center justify-center group-hover:border-primary">
+<div class="w-3 h-3 bg-primary rounded-sm opacity-0 checked-indicator"></div>
+</div>
+</div>
+<div class="aspect-[2/3] w-full bg-white border border-outline-variant rounded-lg overflow-hidden book-card-shadow transition-all duration-300">
+<img alt="Novel Structure" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHyxvC70jaGY6fqK1SRcd84VdKZVcijtZarBArma-BSSeFNr_tcNdo-ltkUmiRmwK_smxkHiBnEnww5M03gkUV5z4CUvL1J9a2WB5_9SvpB7ZqpiXXcVO2NYhpZshNjbNlYoXwuI5nq6aH6YybK48ghJeUGf8JXjQndXqOpvvyFiCt0X_So7yo5jHCxsBJEGX-d9WPdnemTGcMjMgMnEr_JDb0ukywE3eg4LTF1TtrRIsZNvlB5mHjE3KQBxTUkgnE5eUOJwwdnnrY"/>
+</div>
+<div class="mt-stack_md px-1">
+<p class="font-body-ui font-bold text-on-surface truncate">书籍(3)</p>
+<p class="text-label-caps text-outline uppercase tracking-widest mt-1">8,900 WORDS</p>
+</div>
+</div>
+<!-- "Create New Work" Card -->
+<div class="flex flex-col group cursor-pointer h-full">
+<div class="aspect-[2/3] w-full bg-surface-container-low border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center gap-6 transition-all duration-300 hover:border-primary hover:bg-surface-container-high book-card-shadow">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="add" style="font-size: 40px;">add</span>
+</div>
+<p class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">创建新的作品</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Batch Action Bar (Sticky Bottom) -->
+<div class="fixed bottom-0 md:left-[260px] left-0 right-0 bg-primary text-white h-20 flex items-center justify-between px-8 z-[60] batch-bar-animation" id="batchBar">
+<div class="flex items-center gap-6">
+<span class="text-sm font-bold"><span id="selectedCount">0</span> 个项目已选择</span>
+<button class="text-xs text-white/60 hover:text-white underline" onclick="toggleBatchMode()">取消批量</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-6 py-2 rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">drive_file_move</span>
+<span class="text-sm font-bold">分组</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-2 rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span class="text-sm font-bold">导出</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-2 rounded-full bg-error hover:bg-error/90 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+<span class="text-sm font-bold">删除</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-background border-t border-outline-variant px-2 z-50 rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-primary font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<span class="text-[10px] mt-1">创作</span>
+</a>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] mt-1">创作</span>
+</button>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[10px] mt-1">文件</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-[10px] mt-1">素材</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] mt-1">设置</span>
+</a>
+</nav>
+<script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('mobile-sidebar-hidden')) {
+                sidebar.classList.remove('mobile-sidebar-hidden');
+                sidebar.classList.add('mobile-sidebar-visible');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('mobile-sidebar-hidden');
+                sidebar.classList.remove('mobile-sidebar-visible');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Panel Management
+        function toggleSearchPanel(show) {
+            const panel = document.getElementById('searchPanel');
+            const overlay = document.getElementById('globalOverlay');
+            if (show) {
+                panel.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+                closeOtherPanels('search');
+            }
+        }
+
+        function toggleTrashPanel() {
+            const panel = document.getElementById('trashPanel');
+            const overlay = document.getElementById('globalOverlay');
+            panel.classList.toggle('hidden');
+            overlay.classList.toggle('hidden', panel.classList.contains('hidden'));
+            if (!panel.classList.contains('hidden')) closeOtherPanels('trash');
+        }
+
+        function toggleMoreMenu() {
+            const panel = document.getElementById('moreMenu');
+            const overlay = document.getElementById('globalOverlay');
+            panel.classList.toggle('hidden');
+            overlay.classList.toggle('hidden', panel.classList.contains('hidden'));
+            if (!panel.classList.contains('hidden')) closeOtherPanels('more');
+        }
+
+        function closeAllPanels() {
+            document.getElementById('searchPanel').classList.add('hidden');
+            document.getElementById('trashPanel').classList.add('hidden');
+            document.getElementById('moreMenu').classList.add('hidden');
+            document.getElementById('globalOverlay').classList.add('hidden');
+        }
+
+        function closeOtherPanels(current) {
+            if (current !== 'search') document.getElementById('searchPanel').classList.add('hidden');
+            if (current !== 'trash') document.getElementById('trashPanel').classList.add('hidden');
+            if (current !== 'more') document.getElementById('moreMenu').classList.add('hidden');
+        }
+
+        // Batch Management
+        let isBatchMode = false;
+        let selectedCount = 0;
+
+        function toggleBatchMode() {
+            isBatchMode = !isBatchMode;
+            const checkboxes = document.querySelectorAll('.batch-checkbox');
+            const batchBar = document.getElementById('batchBar');
+            
+            checkboxes.forEach(cb => {
+                cb.classList.toggle('hidden', !isBatchMode);
+                cb.closest('.group').classList.toggle('ring-2', false);
+                cb.closest('.group').classList.toggle('ring-primary', false);
+                cb.querySelector('.checked-indicator').classList.add('opacity-0');
+            });
+
+            if (isBatchMode) {
+                batchBar.classList.add('batch-bar-visible');
+                closeAllPanels();
+            } else {
+                batchBar.classList.remove('batch-bar-visible');
+                selectedCount = 0;
+                document.getElementById('selectedCount').innerText = selectedCount;
+            }
+        }
+
+        // Handle card selection in batch mode
+        document.querySelectorAll('#bookshelfGrid .group').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!isBatchMode) return;
+                e.preventDefault();
+                const indicator = card.querySelector('.checked-indicator');
+                const isSelected = indicator.classList.contains('opacity-0');
+                
+                indicator.classList.toggle('opacity-0', !isSelected);
+                card.classList.toggle('ring-2', isSelected);
+                card.classList.toggle('ring-primary', isSelected);
+                
+                selectedCount += isSelected ? 1 : -1;
+                document.getElementById('selectedCount').innerText = selectedCount;
+            });
+        });
+
+        // Trash deletion confirm simulation
+        function confirmDelete(btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[18px] text-error">priority_high</span>';
+            btn.classList.add('bg-error/10');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-error/10');
+            }, 2000);
+        }
+
+        // Search Input focus effect
+        const searchInput = document.getElementById('globalSearchInput');
+        searchInput.addEventListener('blur', (e) => {
+            // Delay to allow panel clicks
+            setTimeout(() => {
+                // If focus didn't move to search panel, we could close it, but globalOverlay handles this better
+            }, 200);
+        });
+    </script>
+</body></html>
