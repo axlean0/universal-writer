@@ -1,0 +1,682 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style="width: 1280px; height: 1024px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>设置 - 创作者空间</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#c8f17a",
+                        "on-background": "#1a1c1b",
+                        "on-surface-variant": "#43474c",
+                        "background": "#faf9f7",
+                        "on-tertiary-fixed": "#291802",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#364e00",
+                        "on-primary-container": "#96a9be",
+                        "outline-variant": "#c4c6cd",
+                        "tertiary-fixed": "#ffddb7",
+                        "on-primary": "#ffffff",
+                        "primary": "#162839",
+                        "inverse-primary": "#b5c8df",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-secondary-container": "#4e6e00",
+                        "primary-fixed": "#d1e4fb",
+                        "secondary": "#496800",
+                        "surface-dim": "#dadad8",
+                        "outline": "#74777d",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f1f1ef",
+                        "primary-container": "#2c3e50",
+                        "surface-bright": "#faf9f7",
+                        "tertiary-container": "#4e381c",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "tertiary": "#362308",
+                        "inverse-surface": "#2f3130",
+                        "on-tertiary-container": "#c1a17d",
+                        "on-surface": "#1a1c1b",
+                        "on-primary-fixed-variant": "#36485b",
+                        "surface-container-high": "#e9e8e6",
+                        "surface-container-low": "#f4f3f1",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-primary-fixed": "#091d2e",
+                        "primary-fixed-dim": "#b5c8df",
+                        "secondary-fixed-dim": "#add461",
+                        "surface-tint": "#4e6073",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container": "#efeeec",
+                        "surface": "#faf9f7",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#131f00",
+                        "secondary-fixed": "#c8f17a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section_margin": "48px",
+                        "sidebar_width": "260px",
+                        "safe_padding": "32px",
+                        "container_max_width": "1200px",
+                        "stack_sm": "8px",
+                        "grid_gutter": "24px",
+                        "stack_md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-reading": ["Source Serif 4"],
+                        "body-ui": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "display-title": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-reading": ["18px", {"lineHeight": "30px", "fontWeight": "400"}],
+                        "body-ui": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "display-title": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .mobile-sidebar-hidden { transform: translateX(-100%); }
+            .mobile-sidebar-visible { transform: translateX(0); }
+        }
+        .sketch-pill {
+            border-radius: 9999px;
+            border: 1.5px solid #74777d;
+        }
+        .settings-nav-item.active {
+            background-color: #efeeec;
+            color: #162839;
+            font-weight: 600;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #162839;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #162839;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        /* Animation for tab switching */
+        .settings-tab:not(.hidden) {
+            animation: tabFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes tabFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sub-section staggering or simple fade for General tab elements */
+        .settings-tab#tab-general .animate-section {
+            opacity: 0;
+            animation: sectionFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .settings-tab#tab-general .animate-section:nth-child(1) { animation-delay: 0.05s; }
+        .settings-tab#tab-general .animate-section:nth-child(2) { animation-delay: 0.1s; }
+        .settings-tab#tab-general .animate-section:nth-child(3) { animation-delay: 0.15s; }
+        .settings-tab#tab-general .animate-section:nth-child(4) { animation-delay: 0.2s; }
+        .settings-tab#tab-general .animate-section:nth-child(5) { animation-delay: 0.25s; }
+
+        @keyframes sectionFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="font-body-ui text-on-surface">
+<!-- Mobile Navigation Overlay -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden md:hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Navigation Drawer (Main) -->
+<aside class="w-sidebar_width h-full fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 flex flex-col sidebar-transition mobile-sidebar-hidden md:mobile-sidebar-visible" id="mainSidebar">
+<div class="p-safe_padding flex flex-col h-full">
+<!-- Profile Header -->
+<div class="mb-10 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant flex-shrink-0">
+<img alt="用户xx" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsN_m2A4bqtSV4xsb-ATxDKvZaTH9JXLdKc-piWslo0bXgMxHSoBvNJm_SsfSPIVwjrZVQgtx5lxbdcRvmYTgkdJf5lBOwiNJpZ2ZA2I5zUz1PeqAVjvmFZokvTY2pfyZV4UMsXzPcmBEXx9K8PPjp36UdMGL2UTpkxLhgd3Er06xoj9dpkQNCgB2tDkD9kqYNIVbA0jyRa3LidtEfK6epQFeGYVIl12A_VbyR7qkjL1NLJfGaAQbibRJIJn0k9_Xwf2WxWBLGfaP_DfQ">
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface truncate">用户XX</h3>
+</div>
+<!-- Nav Links -->
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined">edit</span><span class="text-body-ui">写作</span></a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined">folder</span><span class="text-body-ui">文件</span></a><a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined">category</span><span class="text-body-ui">素材</span></a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined">monitoring</span><span class="text-body-ui">统计</span></a>
+<a class="flex items-center gap-4 px-4 py-3 bg-surface-container-high text-primary font-bold border-l-4 border-secondary transition-colors duration-200" href="#"><span class="material-symbols-outlined">settings</span><span class="text-body-ui">设置</span></a>
+</nav>
+<div class="pt-6 border-t border-outline-variant">
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#"><span class="material-symbols-outlined">cloud_upload</span><span class="text-body-ui">上传云端</span></a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-[260px] min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-30 w-full px-4 md:px-8 py-3 bg-background/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="max-w-container_max_width mx-auto flex items-center gap-6">
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full" onclick="toggleSidebar()">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative flex-1 max-w-2xl mx-auto">
+<div class="flex items-center sketch-pill bg-white px-4 py-1.5 shadow-sm">
+<span class="material-symbols-outlined text-outline mr-2" style="font-size: 20px;">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-body-ui outline-none" placeholder="开始查找" type="text">
+</div>
+</div>
+<div class="flex items-center gap-1 md:gap-4 text-on-surface-variant">
+
+
+
+
+</div>
+</div>
+</header>
+<!-- Settings Container -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Settings Side Nav -->
+<aside class="w-64 border-r border-outline-variant bg-surface-container-low hidden lg:flex flex-col">
+<div class="p-6">
+<h2 class="text-xl font-bold text-on-surface mb-6">设置</h2>
+<nav class="space-y-1">
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg text-body-ui flex items-center gap-3 text-on-surface-variant" onclick="switchTab('editor')">
+<span class="material-symbols-outlined text-xl">edit_note</span>编辑器
+                        </button>
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container text-body-ui flex items-center gap-3 text-on-surface-variant" onclick="switchTab('storage')">
+<span class="material-symbols-outlined text-xl">database</span>存储
+                        </button>
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container text-body-ui flex items-center gap-3 text-on-surface-variant" onclick="switchTab('appearance')">
+<span class="material-symbols-outlined text-xl">palette</span>外观
+                        </button>
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container text-body-ui flex items-center gap-3 text-on-surface-variant" onclick="switchTab('shortcuts')">
+<span class="material-symbols-outlined text-xl">keyboard</span>快捷键
+                        </button>
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container text-body-ui flex items-center gap-3 text-on-surface-variant" onclick="switchTab('general')">
+<span class="material-symbols-outlined text-xl">tune</span>通用
+                        </button>
+<button class="settings-nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container text-body-ui flex items-center gap-3 active" onclick="switchTab('about')">
+<span class="material-symbols-outlined text-xl">info</span>关于
+                        </button>
+</nav>
+</div>
+</aside>
+<!-- Settings Content -->
+<div class="flex-1 overflow-y-auto bg-background p-6 md:p-10">
+<div class="max-w-4xl mx-auto">
+<!-- Editor Tab -->
+<section class="settings-tab hidden" id="tab-editor">
+<h1 class="text-2xl font-bold mb-8">编辑器设置</h1>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-10">
+<div class="space-y-8">
+<div class="flex flex-col gap-2">
+<label class="text-body-ui font-semibold">字体</label>
+<select class="w-full rounded-lg border-outline-variant bg-white text-body-ui focus:border-primary focus:ring-primary" id="font-family" onchange="updatePreview()">
+<option value="Source Serif 4">Source Serif 4 (默认)</option>
+<option value="Manrope">Manrope</option>
+<option value="monospace">System Mono</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<label class="text-body-ui font-semibold">字号</label>
+<span class="text-sm font-medium" id="font-size-val">18px</span>
+</div>
+<input class="w-full accent-primary" id="font-size" max="32" min="12" oninput="updatePreview()" step="1" type="range" value="18">
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<label class="text-body-ui font-semibold">行间距</label>
+<span class="text-sm font-medium" id="line-height-val">1.6</span>
+</div>
+<input class="w-full accent-primary" id="line-height" max="2.5" min="1.0" oninput="updatePreview()" step="0.1" type="range" value="1.6">
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<label class="text-body-ui font-semibold">页面宽度</label>
+<span class="text-sm font-medium" id="page-width-val">800px</span>
+</div>
+<input class="w-full accent-primary" id="page-width" max="1200" min="400" oninput="updatePreview()" step="50" type="range" value="800">
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<label class="text-body-ui font-semibold">实时预览</label>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm overflow-hidden h-full min-h-[300px] flex items-center justify-center">
+<div class="mx-auto" id="preview-container" style="max-width: 800px;">
+<p class="text-on-surface leading-[1.6] transition-all duration-200" id="preview-text" style="font-family: &quot;Source Serif 4&quot;; font-size: 18px; line-height: 1.6;">
+                                            避风港是一个专为创作者设计的宁静空间。在这里，您可以远离尘世的喧嚣，全身心地投入到写作与思考中。文字如泉水般流淌，构建出属于您的精神领地。每一段话语，每一个字符，都在这个静谧的角落里熠熠生辉。
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Storage Tab -->
+<section class="settings-tab hidden" id="tab-storage"><h1 class="text-2xl font-bold mb-8">存储与备份</h1>
+<div class="space-y-10">
+<!-- 本地存储路径 -->
+<div class="flex flex-col gap-4">
+<label class="text-body-ui font-semibold">本地存储路径</label>
+<div class="flex flex-wrap gap-2">
+<input class="flex-1 min-w-[200px] rounded-lg border-outline-variant bg-surface-container-low text-sm text-on-surface-variant px-3 py-2" disabled="" type="text" value="C:\Users\User\Documents\WriterSanctuary">
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">更改</button>
+<button class="px-4 py-2 border border-outline text-on-surface-variant rounded-lg text-sm font-medium hover:bg-surface-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">folder_open</span>打开文件夹
+                </button>
+</div>
+</div>
+</div>
+<!-- 自动保存 -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-semibold">自动保存</h4>
+<p class="text-sm text-on-surface-variant">自动保存您的所有修改。</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-4 border-l-2 border-outline-variant/30">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium">保存间隔</label>
+<select class="rounded-lg border-outline-variant bg-white text-sm">
+<option>10秒</option>
+<option selected="">30秒</option>
+<option>1分钟</option>
+<option>3分钟</option>
+<option>5分钟</option>
+<option>10分钟</option>
+</select>
+</div>
+<div class="flex flex-col gap-3 justify-center">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="text-sm">空闲时自动保存</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="text-sm">显示保存状态</span>
+</label>
+</div>
+</div>
+</div>
+<!-- 自动备份 -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-semibold">自动备份</h4>
+<p class="text-sm text-on-surface-variant">定期在后台创建完整的数据库备份。</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-4 border-l-2 border-outline-variant/30">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium">备份频率</label>
+<select class="rounded-lg border-outline-variant bg-white text-sm">
+<option>30分钟</option>
+<option selected="">1小时</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium">备份保留数量</label>
+<select class="rounded-lg border-outline-variant bg-white text-sm">
+<option>5份</option>
+<option selected="">10份</option>
+<option>20份</option>
+<option>30份</option>
+<option>无限</option>
+</select>
+</div>
+<div class="flex flex-col gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="text-sm">退出软件时备份</span>
+</label>
+</div>
+<div class="flex items-end">
+<button class="px-4 py-2 border border-outline text-on-surface-variant rounded-lg text-sm font-medium hover:bg-surface-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">history</span>
+<span class="">历史备份管理</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 云端与恢复 -->
+<div class="pt-6 border-t border-outline-variant/30 space-y-8">
+<div class="flex flex-col gap-4">
+<h4 class="font-semibold">云端同步</h4>
+<button class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity w-full md:w-auto">
+<span class="material-symbols-outlined">cloud_upload</span>上传云端
+            </button>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-semibold">数据恢复</h4>
+<div class="flex flex-wrap gap-4">
+<button class="flex items-center gap-2 px-6 py-2.5 border border-outline text-on-surface-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-xl">medical_services</span>崩溃恢复
+                </button>
+<button class="flex items-center gap-2 px-6 py-2.5 border border-outline text-on-surface-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-xl">restore</span>恢复历史版本
+                </button>
+</div>
+</div>
+</div>
+</div></section>
+<!-- Appearance Tab -->
+<section class="settings-tab hidden" id="tab-appearance">
+<h1 class="text-2xl font-bold mb-8">外观设置</h1>
+<div class="space-y-10">
+<div class="flex flex-col gap-4">
+<label class="text-body-ui font-semibold">主题模式</label>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+<button class="flex flex-col items-center gap-2 p-4 border-2 border-primary rounded-xl bg-white group ring-4 ring-primary/5">
+<div class="w-full aspect-video bg-gray-50 rounded border border-outline-variant mb-1"></div>
+<span class="text-sm font-semibold">浅色 (默认)</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-4 border border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<div class="w-full aspect-video bg-slate-900 rounded border border-outline-variant mb-1"></div>
+<span class="text-sm font-medium">深色</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-4 border border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<div class="w-full aspect-video bg-[#f2e6d9] rounded border border-outline-variant mb-1"></div>
+<span class="text-sm font-medium">护眼</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-4 border border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<div class="w-full aspect-video bg-gradient-to-br from-white to-slate-900 rounded border border-outline-variant mb-1"></div>
+<span class="text-sm font-medium">跟随系统</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex justify-between max-w-sm">
+<label class="text-body-ui font-semibold">界面缩放</label>
+<span class="text-sm font-medium">100%</span>
+</div>
+<input class="w-full max-w-sm accent-primary" max="150" min="80" step="5" type="range" value="100">
+<p class="text-xs text-on-surface-variant">调整系统图标、文字和间距的整体大小。</p>
+</div>
+</div>
+</section>
+<!-- Shortcuts Tab -->
+<section class="settings-tab hidden" id="tab-shortcuts">
+<h1 class="text-2xl font-bold mb-8">快捷键</h1>
+<div class="bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant">
+<table class="w-full text-left text-sm">
+<thead class="bg-surface-container-high border-b border-outline-variant">
+<tr>
+<th class="px-6 py-4 font-bold text-on-surface uppercase tracking-wider text-xs">操作命令</th>
+<th class="px-6 py-4 font-bold text-on-surface uppercase tracking-wider text-xs">组合键</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-6 py-4">保存文档</td>
+<td class="px-6 py-4"><kbd class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant font-sans text-xs">Ctrl + S</kbd></td>
+</tr>
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-6 py-4">新建文档</td>
+<td class="px-6 py-4"><kbd class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant font-sans text-xs">Ctrl + N</kbd></td>
+</tr>
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-6 py-4">全屏聚焦模式</td>
+<td class="px-6 py-4"><kbd class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant font-sans text-xs">F11</kbd></td>
+</tr>
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-6 py-4">查找替换</td>
+<td class="px-6 py-4"><kbd class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant font-sans text-xs">Ctrl + F</kbd></td>
+</tr>
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-6 py-4">插入图片</td>
+<td class="px-6 py-4"><kbd class="px-2 py-1 bg-surface-container-highest rounded border border-outline-variant font-sans text-xs">Ctrl + Shift + I</kbd></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- General Tab -->
+<section class="settings-tab hidden" id="tab-general">
+<h1 class="text-2xl font-bold mb-8">通用设置</h1>
+<div class="space-y-0">
+<div class="animate-section grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+<div class="flex flex-col gap-2">
+<label class="text-body-ui font-semibold">软件语言</label>
+<select class="rounded-lg border-outline-variant bg-white text-body-ui">
+<option>简体中文</option>
+<option>繁體中文</option>
+<option>English</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-body-ui font-semibold">默认启动页</label>
+<select class="rounded-lg border-outline-variant bg-white text-body-ui">
+<option>书架</option>
+<option selected="">写作/统筹</option>
+<option>文件</option>
+<option>统计</option>
+</select>
+</div>
+</div>
+<div class="animate-section py-6 border-y border-outline-variant/30 flex items-center justify-between">
+<div>
+<h4 class="font-semibold">安全锁</h4>
+<p class="text-sm text-on-surface-variant">启动软件时需要输入密码。</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-sm font-semibold text-primary underline underline-offset-4">设置密码</button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+</div>
+<div class="animate-section py-6 border-b border-outline-variant/30">
+<div class="flex flex-col gap-4">
+<h4 class="font-semibold">回收站设置</h4>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-body-ui">文件保留时间</label>
+<div class="flex items-center gap-2">
+<input class="w-24 rounded-lg border-outline-variant bg-white text-body-ui focus:border-primary focus:ring-primary" max="365" min="1" placeholder="5" type="number" value="30">
+<span class="text-sm text-on-surface-variant">天</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant">自动永久删除超过指定天数的文件。</p>
+</div>
+</div>
+</div>
+<div class="animate-section py-6 border-b border-outline-variant/30">
+<div class="flex flex-col gap-4">
+<h4 class="font-semibold">历史设置</h4>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-body-ui">历史记录保留条数</label>
+<div class="flex items-center gap-2">
+<input class="w-24 rounded-lg border-outline-variant bg-white text-body-ui focus:border-primary focus:ring-primary" max="100" min="1" type="number" value="50">
+<span class="text-sm text-on-surface-variant">条</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant">每篇文档保留的历史编辑版本上限。</p>
+</div>
+</div>
+</div>
+<div class="animate-section flex flex-wrap gap-4 pt-8">
+<button class="flex items-center gap-2 px-6 py-2.5 border border-outline text-on-surface-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-xl">delete_sweep</span>清理缓存
+                                </button>
+</div>
+</div>
+</section>
+<!-- About Tab -->
+<section class="settings-tab" id="tab-about">
+<h1 class="text-2xl font-bold mb-8">关于软件</h1>
+<div class="flex flex-col items-center text-center space-y-8 py-10">
+<div class="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center text-white shadow-xl">
+<span class="material-symbols-outlined text-5xl">auto_stories</span>
+</div>
+<div>
+<h2 class="text-3xl font-bold mb-2">universal writer</h2>
+<p class="text-on-surface-variant font-medium">版本 v1.2.0 (Stable Build)</p>
+</div>
+<div class="w-full max-w-md space-y-4">
+<a class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="font-semibold">关于软件</span>
+<span class="material-symbols-outlined">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="font-semibold">检查更新</span>
+<span class="material-symbols-outlined">chevron_right</span>
+</a>
+</div>
+<p class="text-xs text-outline leading-relaxed max-w-sm">
+                                © 2026&nbsp;universal writer Team. 保留所有权利。<br>
+                                用爱心与代码为全球创作者打造的宁静之所。
+                            </p>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('mobile-sidebar-hidden')) {
+                sidebar.classList.remove('mobile-sidebar-hidden');
+                sidebar.classList.add('mobile-sidebar-visible');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('mobile-sidebar-hidden');
+                sidebar.classList.remove('mobile-sidebar-visible');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update nav items
+            document.querySelectorAll('.settings-nav-item').forEach(btn => {
+                btn.classList.remove('active', 'text-primary', 'font-bold', 'bg-surface-container');
+                btn.classList.add('text-on-surface-variant');
+                
+                // Simplified matching logic for the demo
+                const iconMap = {
+                    'editor': 'edit_note',
+                    'storage': 'database',
+                    'appearance': 'palette',
+                    'shortcuts': 'keyboard',
+                    'general': 'tune',
+                    'about': 'info'
+                };
+                
+                if (btn.querySelector('.material-symbols-outlined').textContent.trim() === iconMap[tabName]) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-on-surface-variant');
+                }
+            });
+
+            // Update content sections
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            const targetTab = document.getElementById('tab-' + tabName);
+            targetTab.classList.remove('hidden');
+
+            // Force restart General tab internal animations if it's the general tab
+            if (tabName === 'general') {
+                const animatedSections = targetTab.querySelectorAll('.animate-section');
+                animatedSections.forEach(section => {
+                    section.style.animation = 'none';
+                    section.offsetHeight; // trigger reflow
+                    section.style.animation = null;
+                });
+            }
+        }
+
+        function updatePreview() {
+            const family = document.getElementById('font-family').value;
+            const size = document.getElementById('font-size').value;
+            const lineHeight = document.getElementById('line-height').value;
+            const pageWidth = document.getElementById('page-width').value;
+
+            const fontSizeElement = document.getElementById('font-size-val');
+            const lineHeightElement = document.getElementById('line-height-val');
+            const pageWidthElement = document.getElementById('page-width-val');
+
+            if(fontSizeElement) fontSizeElement.textContent = size + 'px';
+            if(lineHeightElement) lineHeightElement.textContent = lineHeight;
+            if(pageWidthElement) pageWidthElement.textContent = pageWidth + 'px';
+
+            const previewText = document.getElementById('preview-text');
+            const previewContainer = document.getElementById('preview-container');
+
+            if(previewText) {
+                previewText.style.fontFamily = family;
+                previewText.style.fontSize = size + 'px';
+                previewText.style.lineHeight = lineHeight;
+            }
+            if(previewContainer) {
+                previewContainer.style.maxWidth = pageWidth + 'px';
+            }
+        }
+
+        // Initialize preview
+        window.addEventListener('DOMContentLoaded', updatePreview);
+    </script>
+
+
+</body></html>

@@ -13,7 +13,20 @@
       "Bash(unzip -p \"素材界面/素材界面结构书.docx\" word/document.xml)",
       "Bash(unzip -p \"统计界面/统计界面结构书.docx\" word/document.xml)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git commit -m 'feat: Universal Writer — 四个主界面完成（写作/文件/素材/统计） *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(unzip -p \"设置界面/设置界面结构书.docx\" word/document.xml)",
+      "Bash(sed 's/<[^>]*>//g')",
+      "Bash(sed 's/^[[:space:]]*//')",
+      "Bash(unzip -p \"编辑器/编辑器结构书/编辑器结构书.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/正文-大纲/正文-大纲界面结构书.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/确认书.docx\" word/document.xml)"
     ],
     "additionalDirectories": [
       "e:\\ty002\\lib"

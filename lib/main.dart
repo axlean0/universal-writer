@@ -4,6 +4,7 @@ import 'pages/bookshelf_page.dart';
 import 'pages/files_page.dart';
 import 'pages/materials_page.dart';
 import 'pages/stats_page.dart';
+import 'pages/settings_page.dart';
 
 void main() {
   runApp(const UniversalWriterApp());
@@ -62,6 +63,13 @@ class _UniversalWriterAppState extends State<UniversalWriterApp> {
           onNavigateToFiles: () => _navigateTo('files'),
           onNavigateToMaterials: () => _navigateTo('materials'),
           onNavigateToSettings: () => _navigateTo('settings'),
+        );
+      case 'settings':
+        return SettingsPage(
+          onNavigateToWriting: () => _navigateTo('writing'),
+          onNavigateToFiles: () => _navigateTo('files'),
+          onNavigateToMaterials: () => _navigateTo('materials'),
+          onNavigateToStats: () => _navigateTo('stats'),
         );
       default:
         return const Scaffold(

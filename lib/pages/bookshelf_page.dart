@@ -6,6 +6,7 @@ import '../widgets/top_bar.dart';
 import '../widgets/book_card.dart';
 import '../widgets/create_dialog.dart';
 import '../widgets/batch_bar.dart';
+import 'editor/editor_shell.dart';
 
 /// Main bookshelf page — the home screen of Universal Writer.
 class BookshelfPage extends StatefulWidget {
@@ -108,7 +109,9 @@ class _BookshelfPageState extends State<BookshelfPage> {
     showDialog(context: context, builder: (_) => _BookDetailDialog(book: book, onDelete: () => _deleteBook(book)));
   }
   void _openBook(Book book) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('进入编辑器: ${book.title}')));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => EditorShell(bookId: book.id)),
+    );
   }
 
   @override
