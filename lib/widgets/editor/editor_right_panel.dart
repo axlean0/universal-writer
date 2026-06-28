@@ -3,19 +3,28 @@ import '../../data/editor_repository.dart';
 import '../../theme/app_theme.dart';
 
 class EditorRightPanel extends StatefulWidget {
+  final VoidCallback? onToggleCollapse;
   final VoidCallback? onToggleReadOnly;
   final VoidCallback? onToggleFullscreen;
   final VoidCallback? onToggleFocus;
   final VoidCallback? onSave;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
   final bool isReadOnly;
   final bool quickViewExpanded;
   final VoidCallback? onToggleQuickView;
+  final int wordCount;
+  final int elapsedSeconds;
+  final bool canUndo;
+  final bool canRedo;
 
   const EditorRightPanel({
     super.key,
-    this.onToggleReadOnly, this.onToggleFullscreen,
-    this.onToggleFocus, this.onSave, this.isReadOnly = false,
-    this.quickViewExpanded = false, this.onToggleQuickView,
+    this.onToggleCollapse, this.onToggleReadOnly, this.onToggleFullscreen,
+    this.onToggleFocus, this.onSave, this.onUndo, this.onRedo,
+    this.isReadOnly = false, this.quickViewExpanded = false, this.onToggleQuickView,
+    this.wordCount = 0, this.elapsedSeconds = 0,
+    this.canUndo = false, this.canRedo = false,
   });
 
   @override
@@ -37,6 +46,19 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
         border: Border(left: BorderSide(color: AppColors.outlineVariant, width: 0.3)),
       ),
       child: Column(children: [
+        if (widget.onToggleCollapse != null)
+          InkWell(
+            onTap: widget.onToggleCollapse,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.outlineVariant, width: 0.3)),
+              ),
+              child: const Center(
+                child: Icon(Icons.chevron_right, size: 16, color: AppColors.onSurfaceVariant),
+              ),
+            ),
+          ),
         // Segmented control
         Padding(
           padding: const EdgeInsets.all(16),
@@ -111,14 +133,14 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             children: [
               _fnBtn(Icons.fullscreen, '全屏', widget.onToggleFullscreen),
               _fnBtn(Icons.self_improvement, '专注', widget.onToggleFocus),
-              _fnBtn(Icons.undo, '撤销', null),
-              _fnBtn(Icons.redo, '重做', null),
+              _fnBtn(Icons.undo, '撤销', widget.canUndo ? widget.onUndo : null),
+              _fnBtn(Icons.redo, '重做', widget.canRedo ? widget.onRedo : null),
               _fnBtn(Icons.visibility, '显示', null),
-              _fnBtn(Icons.lock, widget.isReadOnly ? '只读✓' : '只读', widget.onToggleReadOnly),
+              _fnBtn(Icons.lock, '只读', widget.onToggleReadOnly, active: widget.isReadOnly),
               _fnBtn(Icons.save, '保存', widget.onSave),
               _fnBtn(Icons.more_horiz, '更多', null),
-              _fnBtn(Icons.text_fields, '1,240 字', null),
-              _fnBtn(Icons.timer, '00:45', null),
+              _fnBtn(Icons.text_fields, '${widget.wordCount} 字', null),
+              _fnBtn(Icons.timer, _fmtTime(widget.elapsedSeconds), null),
             ],
           ),
         ),
@@ -140,7 +162,13 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
     );
   }
 
-  Widget _fnBtn(IconData icon, String label, VoidCallback? onTap) {
+  String _fmtTime(int sec) {
+    final m = sec ~/ 60;
+    final s = sec % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  Widget _fnBtn(IconData icon, String label, VoidCallback? onTap, {bool active = false}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -148,10 +176,11 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.lg)),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(icon, size: 18, color: onTap != null ? AppColors.onSurfaceVariant : AppColors.outline),
+          Icon(icon, size: 18,
+              color: active ? AppColors.secondary : (onTap != null ? AppColors.onSurfaceVariant : AppColors.outline)),
           const SizedBox(height: 2),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-              color: onTap != null ? AppColors.onSurfaceVariant : AppColors.outline)),
+              color: active ? AppColors.onSurfaceVariant : (onTap != null ? AppColors.onSurfaceVariant : AppColors.outline))),
         ]),
       ),
     );

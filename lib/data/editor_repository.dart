@@ -26,12 +26,47 @@ class EditorRepository {
     return null;
   }
 
+  int _nextId = 100;
+  String _genId() => '${_nextId++}';
+
+  void addVolume(String name) {
+    final v = Volume(id: _genId(), title: name, chapters: [],
+        order: _current!.volumes.length);
+    _current!.volumes.add(v);
+  }
+
+  void addChapter(String volumeId, String name) {
+    final v = _current!.volumes.firstWhere((v) => v.id == volumeId);
+    final c = Chapter(id: _genId(), title: name, body: '',
+        wordCount: 0, order: v.chapters.length);
+    v.chapters.add(c);
+  }
+
+  void renameChapter(String chapterId, String newName) {
+    final c = chapterById(chapterId);
+    if (c != null) c.title = newName;
+  }
+
+  void renameVolume(String volumeId, String newName) {
+    final v = _current!.volumes.firstWhere((v) => v.id == volumeId);
+    v.title = newName;
+  }
+
+  void deleteChapter(String chapterId) {
+    for (final v in _current!.volumes) {
+      v.chapters.removeWhere((c) => c.id == chapterId);
+    }
+  }
+
+  void deleteVolume(String volumeId) {
+    _current!.volumes.removeWhere((v) => v.id == volumeId);
+  }
+
   // ── Mock data ──
   EditorBook _mock() {
     return EditorBook(
       id: '1',
       title: '创作一号',
-      totalWordCount: 12450,
       outlinePreview: '''
 作品总纲
 ├── 世界背景：异世界奇幻大陆，魔法与科技共存
@@ -39,7 +74,7 @@ class EditorRepository {
 ├── 关键角色：主角、导师、反派、同伴
 └── 结局方向：胜利但付出代价''',
       volumes: [
-        Volume(id: 'v1', title: '第一卷', order: 0, isExpanded: true, chapters: [
+        Volume(id: 'v1', title: '第一卷', order: 0, chapters: [
           Chapter(id: 'c1', title: '第一章 相遇', order: 0, wordCount: 2450,
             body: '在北境的寒风中，她第一次见到了那个改变她命运的人。\n\n远处的雪山在晨曦中泛着银白色的光芒，她的马在积雪中跋涉了三天，终于望见了前方那座孤零零的驿站。\n\n推开厚重的木门，温暖的炉火气息扑面而来。驿站的角落里，一个戴着兜帽的身影正安静地翻阅着一本泛黄的书卷。\n\n"请问，去往霜语城的路..."'),
           Chapter(id: 'c2', title: '第二章 启程', order: 1, wordCount: 1800,

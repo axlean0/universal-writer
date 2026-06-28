@@ -1,27 +1,51 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/editor_models.dart';
 import '../../theme/app_theme.dart';
 
-/// Center editor only — right panel is managed by EditorShell.
 class BodyOutlinePage extends StatefulWidget {
   final Chapter chapter;
   final bool readOnly;
+  final ValueChanged<int>? onWordCountChanged;
+  final ValueChanged<int>? onTimeChanged;
+  final ValueChanged<bool>? onUndoRedoChanged;
 
-  const BodyOutlinePage({super.key, required this.chapter, this.readOnly = false});
+  const BodyOutlinePage({
+    super.key,
+    required this.chapter,
+    this.readOnly = false,
+    this.onWordCountChanged,
+    this.onTimeChanged,
+    this.onUndoRedoChanged,
+  });
 
   @override
-  State<BodyOutlinePage> createState() => _BodyOutlinePageState();
+  State<BodyOutlinePage> createState() => BodyOutlinePageState();
 }
 
-class _BodyOutlinePageState extends State<BodyOutlinePage> {
+class BodyOutlinePageState extends State<BodyOutlinePage> {
   late TextEditingController _titleCtrl;
   late TextEditingController _bodyCtrl;
+  Timer? _timer;
+  int _elapsedSeconds = 0;
+
+  // Undo/redo stacks
+  final List<_TextSnapshot> _undoStack = [];
+  final List<_TextSnapshot> _redoStack = [];
+  DateTime _lastSnapshot = DateTime.now();
+  bool _suppressSnapshots = false;
+
+  bool get _canUndo => _undoStack.isNotEmpty;
+  bool get _canRedo => _redoStack.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
     _titleCtrl = TextEditingController(text: widget.chapter.title);
     _bodyCtrl = TextEditingController(text: widget.chapter.body);
+    _bodyCtrl.addListener(_onTextChanged);
+    _startTimer();
+    _notifyStats();
   }
 
   @override
@@ -30,11 +54,122 @@ class _BodyOutlinePageState extends State<BodyOutlinePage> {
     if (oldWidget.chapter.id != widget.chapter.id) {
       _titleCtrl.text = widget.chapter.title;
       _bodyCtrl.text = widget.chapter.body;
+      _undoStack.clear();
+      _redoStack.clear();
+      _elapsedSeconds = 0;
+      _notifyStats();
+      _notifyUndoRedo();
     }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        _elapsedSeconds++;
+        widget.onTimeChanged?.call(_elapsedSeconds);
+      }
+    });
+  }
+
+  void _onTextChanged() {
+    if (_suppressSnapshots) return;
+    final now = DateTime.now();
+    if (now.difference(_lastSnapshot).inSeconds >= 3) {
+      _takeSnapshot();
+      _lastSnapshot = now;
+    }
+    _notifyStats();
+  }
+
+  void _takeSnapshot() {
+    _undoStack.add(_TextSnapshot(_titleCtrl.text, _bodyCtrl.text));
+    if (_undoStack.length > 50) _undoStack.removeAt(0);
+    _redoStack.clear();
+    _notifyUndoRedo();
+  }
+
+  void undo() {
+    if (!_canUndo) return;
+    _suppressSnapshots = true;
+    _redoStack.add(_TextSnapshot(_titleCtrl.text, _bodyCtrl.text));
+    final snap = _undoStack.removeLast();
+    _applySnapshot(snap);
+    _suppressSnapshots = false;
+    _lastSnapshot = DateTime.now();
+    _notifyStats();
+    _notifyUndoRedo();
+  }
+
+  void redo() {
+    if (!_canRedo) return;
+    _suppressSnapshots = true;
+    _undoStack.add(_TextSnapshot(_titleCtrl.text, _bodyCtrl.text));
+    final snap = _redoStack.removeLast();
+    _applySnapshot(snap);
+    _suppressSnapshots = false;
+    _lastSnapshot = DateTime.now();
+    _notifyStats();
+    _notifyUndoRedo();
+  }
+
+  void _applySnapshot(_TextSnapshot snap) {
+    _titleCtrl.text = snap.title;
+    _bodyCtrl.text = snap.body;
+    widget.chapter.title = snap.title;
+    widget.chapter.body = snap.body;
+  }
+
+  void _notifyStats() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        widget.onWordCountChanged?.call(_wordCount);
+      }
+    });
+  }
+
+  void _notifyUndoRedo() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        widget.onUndoRedoChanged?.call(_canUndo || _canRedo);
+      }
+    });
+  }
+
+  int get _wordCount {
+    final text = _bodyCtrl.text;
+    if (text.isEmpty) return 0;
+    // Count Chinese chars + space-separated words
+    int count = 0;
+    bool inWord = false;
+    for (int i = 0; i < text.length; i++) {
+      final c = text[i];
+      if (c == ' ' || c == '\n' || c == '\t') {
+        if (inWord) { count++; inWord = false; }
+      } else if (c.codeUnitAt(0) > 127) {
+        // CJK character
+        count++;
+        inWord = false;
+      } else {
+        inWord = true;
+      }
+    }
+    if (inWord) count++;
+    return count;
+  }
+
+  String get timeDisplay {
+    final h = _elapsedSeconds ~/ 3600;
+    final m = (_elapsedSeconds % 3600) ~/ 60;
+    final s = _elapsedSeconds % 60;
+    if (h > 0) return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
+    _titleCtrl.removeListener(_onTextChanged);
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
     super.dispose();
@@ -45,7 +180,7 @@ class _BodyOutlinePageState extends State<BodyOutlinePage> {
     return Container(
       color: AppColors.background,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 672),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -83,4 +218,17 @@ class _BodyOutlinePageState extends State<BodyOutlinePage> {
       ),
     );
   }
+
+  // Expose for external callers
+  void handleUndo() => undo();
+  void handleRedo() => redo();
+  bool get canUndo => _canUndo;
+  bool get canRedo => _canRedo;
+  int get wordCount => _wordCount;
+}
+
+class _TextSnapshot {
+  final String title;
+  final String body;
+  _TextSnapshot(this.title, this.body);
 }

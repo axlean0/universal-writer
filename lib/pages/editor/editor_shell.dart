@@ -25,7 +25,13 @@ class _EditorShellState extends State<EditorShell> {
   String? _activeChapterId;
   Chapter? get _activeChapter => EditorRepository.i.chapterById(_activeChapterId ?? '');
 
-  // ── Search ──
+  // Stats passed from BodyOutlinePage to RightPanel
+  int _wordCount = 0;
+  int _elapsedTime = 0;
+  bool _canUndo = false;
+  bool _canRedo = false;
+  final GlobalKey<BodyOutlinePageState> _editorKey = GlobalKey();
+
   final _searchCtrl = TextEditingController();
   List<Chapter> _searchResults = [];
 
@@ -53,16 +59,7 @@ class _EditorShellState extends State<EditorShell> {
     if (first != null) _activeChapterId = first.id;
   }
 
-  void _selectChapter(Chapter c) {
-    if (_activeChapter != null && c.id != _activeChapterId) {
-      // Auto-save current to memory before switching
-      EditorRepository.i.current.volumes
-          .expand((v) => v.chapters)
-          .firstWhere((ch) => ch.id == _activeChapterId, orElse: () => c)
-          .copyWith(); // no-op for mock, real would persist
-    }
-    setState(() => _activeChapterId = c.id);
-  }
+  void _selectChapter(Chapter c) => setState(() => _activeChapterId = c.id);
 
   @override
   void dispose() { _searchCtrl.dispose(); super.dispose(); }
@@ -71,77 +68,107 @@ class _EditorShellState extends State<EditorShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(children: [
-        // ── Top bar ──
-        if (_topVisible)
-          EditorTopBar(
-            searchCtrl: _searchCtrl,
-            searchResults: _searchResults,
-            onSearch: _search,
-            onJumpTo: _jumpToChapter,
-            onToggleCollapse: () => setState(() => _topVisible = false),
-          ),
-        if (!_topVisible)
-          _collapseToggle(Icons.expand_more, () => setState(() => _topVisible = true)),
-
-        // ── Main content ──
-        Expanded(
-          child: Row(children: [
-            // Left: Chapter tree
-            if (_leftVisible)
-              Stack(clipBehavior: Clip.none, children: [
-                ChapterTree(
-                  activeChapterId: _activeChapterId,
-                  onSelectChapter: _selectChapter,
-                  onBack: () => Navigator.of(context).pop(),
-                ),
-                Positioned(
-                  right: -10, top: 0, bottom: 0,
-                  child: Center(
-                    child: _edgeBtn(Icons.chevron_left, () => setState(() => _leftVisible = false)),
-                  ),
-                ),
-              ]),
-            if (!_leftVisible)
-              _sideToggle(Icons.chevron_right, () => setState(() => _leftVisible = true)),
-
-            // Center editor
-            Expanded(
-              child: _activeChapter != null
-                  ? BodyOutlinePage(chapter: _activeChapter!, readOnly: _readOnly)
-                  : const Center(child: Text('请选择一个章节开始写作',
-                      style: TextStyle(color: AppColors.outline, fontSize: 15))),
+      body: Stack(children: [
+        // ── Main Row (bottom layer) ──
+        Row(children: [
+          if (_leftVisible)
+            SizedBox(
+              width: AppSpacing.sidebarWidth,
+              child: ChapterTree(
+                activeChapterId: _activeChapterId,
+                onSelectChapter: _selectChapter,
+                onBack: () => Navigator.of(context).pop(),
+                onChanged: () => setState(() {}),
+              ),
             ),
+          if (!_leftVisible)
+            const SizedBox(width: 8),
 
-            // Right panel
-            if (_rightVisible)
-              Stack(clipBehavior: Clip.none, children: [
-                EditorRightPanel(
-                  isReadOnly: _readOnly,
-                  quickViewExpanded: _quickViewExpanded,
-                  onToggleReadOnly: () => setState(() => _readOnly = !_readOnly),
-                  onToggleFullscreen: () {},
-                  onToggleFocus: () => setState(() {
-                    _topVisible = false; _leftVisible = false; _rightVisible = false;
-                  }),
-                  onSave: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('已保存'), duration: Duration(seconds: 1)),
-                    );
-                  },
-                  onToggleQuickView: () => setState(() => _quickViewExpanded = !_quickViewExpanded),
+          Expanded(
+            child: Column(children: [
+              if (_topVisible)
+                EditorTopBar(
+                  searchCtrl: _searchCtrl, searchResults: _searchResults,
+                  onSearch: _search, onJumpTo: _jumpToChapter,
+                  onToggleCollapse: () => setState(() => _topVisible = false),
                 ),
-                Positioned(
-                  left: -10, top: 0, bottom: 0,
-                  child: Center(
-                    child: _edgeBtn(Icons.chevron_right, () => setState(() => _rightVisible = false)),
+              if (!_topVisible)
+                _collapseToggle(Icons.expand_more, () => setState(() => _topVisible = true)),
+
+              Expanded(
+                child: Row(children: [
+                  Expanded(
+                    child: _activeChapter != null
+                        ? BodyOutlinePage(
+                            key: _editorKey,
+                            chapter: _activeChapter!,
+                            readOnly: _readOnly,
+                            onWordCountChanged: (c) => setState(() => _wordCount = c),
+                            onTimeChanged: (t) => setState(() => _elapsedTime = t),
+                            onUndoRedoChanged: (v) => setState(() {
+                              _canUndo = _editorKey.currentState?.canUndo ?? false;
+                              _canRedo = _editorKey.currentState?.canRedo ?? false;
+                            }),
+                          )
+                        : const Center(child: Text('请选择一个章节开始写作',
+                            style: TextStyle(color: AppColors.outline, fontSize: 15))),
                   ),
-                ),
-              ]),
-            if (!_rightVisible)
-              _sideToggle(Icons.chevron_left, () => setState(() => _rightVisible = true)),
-          ]),
-        ),
+                  if (_rightVisible)
+                    SizedBox(
+                      width: AppSpacing.sidebarWidth,
+                      child: EditorRightPanel(
+                        isReadOnly: _readOnly, quickViewExpanded: _quickViewExpanded,
+                        wordCount: _wordCount, elapsedSeconds: _elapsedTime,
+                        canUndo: _canUndo, canRedo: _canRedo,
+                        onUndo: () { _editorKey.currentState?.handleUndo(); },
+                        onRedo: () { _editorKey.currentState?.handleRedo(); },
+                        onToggleReadOnly: () => setState(() => _readOnly = !_readOnly),
+                        onToggleFullscreen: () {},
+                        onToggleFocus: () => setState(() {
+                          _topVisible = false; _leftVisible = false; _rightVisible = false;
+                        }),
+                        onSave: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('已保存'), duration: Duration(seconds: 1)),
+                          );
+                        },
+                        onToggleQuickView: () => setState(() => _quickViewExpanded = !_quickViewExpanded),
+                      ),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
+        ]),
+        // ── Collapse/expand buttons (top layer — renders above Row) ──
+        if (_leftVisible)
+          Positioned(
+            left: AppSpacing.sidebarWidth - 12, top: 0, bottom: 0,
+            child: Center(
+              child: _edgeBtn(Icons.chevron_left, () => setState(() => _leftVisible = false)),
+            ),
+          ),
+        if (!_leftVisible)
+          Positioned(
+            left: -4, top: 0, bottom: 0,
+            child: Center(
+              child: _edgeBtn(Icons.chevron_right, () => setState(() => _leftVisible = true)),
+            ),
+          ),
+        if (_rightVisible)
+          Positioned(
+            right: AppSpacing.sidebarWidth - 12, top: 0, bottom: 0,
+            child: Center(
+              child: _edgeBtn(Icons.chevron_right, () => setState(() => _rightVisible = false)),
+            ),
+          ),
+        if (!_rightVisible)
+          Positioned(
+            right: -4, top: 0, bottom: 0,
+            child: Center(
+              child: _edgeBtn(Icons.chevron_left, () => setState(() => _rightVisible = true)),
+            ),
+          ),
       ]),
     );
   }
@@ -150,16 +177,7 @@ class _EditorShellState extends State<EditorShell> {
     onTap: onTap,
     child: Container(
       color: AppColors.surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Center(child: Icon(icon, size: 20, color: AppColors.onSurfaceVariant)),
-    ),
-  );
-
-  Widget _sideToggle(IconData icon, VoidCallback onTap) => InkWell(
-    onTap: onTap,
-    child: Container(
-      width: 32,
-      color: AppColors.surfaceContainerLow,
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Center(child: Icon(icon, size: 18, color: AppColors.onSurfaceVariant)),
     ),
   );

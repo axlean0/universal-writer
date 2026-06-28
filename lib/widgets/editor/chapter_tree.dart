@@ -3,16 +3,27 @@ import '../../models/editor_models.dart';
 import '../../data/editor_repository.dart';
 import '../../theme/app_theme.dart';
 
+String _toCn(int n) {
+  if (n <= 0) return '零';
+  const d = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const t = ['', '十', '二十', '三十', '四十', '五十', '六十', '七十', '八十', '九十'];
+  if (n < 10) return d[n];
+  if (n < 100) return '${t[n ~/ 10]}${d[n % 10]}';
+  return '$n';
+}
+
 class ChapterTree extends StatefulWidget {
   final String? activeChapterId;
   final ValueChanged<Chapter> onSelectChapter;
   final VoidCallback onBack;
+  final VoidCallback? onChanged;
 
   const ChapterTree({
     super.key,
     this.activeChapterId,
     required this.onSelectChapter,
     required this.onBack,
+    this.onChanged,
   });
 
   @override
@@ -21,24 +32,204 @@ class ChapterTree extends StatefulWidget {
 
 class _ChapterTreeState extends State<ChapterTree> {
   EditorMode _mode = EditorMode.body;
-  // Internal expanded state — does not mutate the data model
   final Set<String> _expandedVolumeIds = {};
+
+  void _showNewMenu() {
+    showMenu<String>(
+      context: context,
+      position: const RelativeRect.fromLTRB(100, 300, 200, 300),
+      elevation: 8, color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: const BorderSide(color: AppColors.outlineVariant)),
+      items: const [
+        PopupMenuItem(value: 'volume', height: 36,
+          child: Row(children: [Icon(Icons.create_new_folder, size: 18, color: AppColors.primary), SizedBox(width: 12),
+            Text('新建卷', style: TextStyle(fontFamily: 'Manrope', fontSize: 14))])),
+        PopupMenuItem(value: 'chapter', height: 36,
+          child: Row(children: [Icon(Icons.note_add, size: 18, color: AppColors.primary), SizedBox(width: 12),
+            Text('新建章', style: TextStyle(fontFamily: 'Manrope', fontSize: 14))])),
+      ],
+    ).then((v) {
+      if (v == null || !mounted) return;
+      final book = EditorRepository.i.current;
+      final isVol = v == 'volume';
+      final nextNum = isVol
+          ? book.volumes.length + 1
+          : book.volumes.firstWhere((x) => _expandedVolumeIds.contains(x.id),
+              orElse: () => book.volumes.isNotEmpty ? book.volumes.first : book.volumes.last)
+              .chapters.length + 1;
+      final numStr = '第${_toCn(nextNum)}${isVol ? '卷' : '章'}';
+
+      _showCreateDialog(isVol ? '新建卷' : '新建章', numStr, (name) {
+        final full = '$numStr $name';
+        if (isVol) {
+          EditorRepository.i.addVolume(full);
+          _expandedVolumeIds.add(book.volumes.last.id);
+        } else {
+          final vid = book.volumes.firstWhere((x) => _expandedVolumeIds.contains(x.id),
+              orElse: () => book.volumes.first).id;
+          EditorRepository.i.addChapter(vid, full);
+          _expandedVolumeIds.add(vid);
+          widget.onSelectChapter(book.volumes.firstWhere((x) => x.id == vid).chapters.last);
+        }
+        setState(() {});
+        widget.onChanged?.call();
+      });
+    });
+  }
+
+  void _showCreateDialog(String title, String numPrefix, ValueChanged<String> onConfirm) {
+    final nameCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlg) => AlertDialog(
+          title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          content: Form(
+            key: formKey,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              // Number display
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(color: AppColors.surfaceContainerLow, borderRadius: BorderRadius.circular(AppRadius.lg)),
+                child: Row(children: [
+                  const Icon(Icons.tag, size: 16, color: AppColors.outline),
+                  const SizedBox(width: 8),
+                  Text('编号：$numPrefix', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: nameCtrl,
+                autofocus: true, maxLength: 15,
+                decoration: const InputDecoration(hintText: '名称（必填，≤15字符）', counterText: ''),
+                validator: (v) => (v == null || v.trim().isEmpty) ? '名称不能为空' : null,
+                onChanged: (_) => setDlg(() {}),
+              ),
+              if (nameCtrl.text.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.surfaceContainerLow, borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  child: Row(children: [
+                    const Icon(Icons.visibility, size: 16, color: AppColors.outline),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('$numPrefix ${nameCtrl.text}', style: const TextStyle(fontSize: 14, color: AppColors.primary))),
+                  ]),
+                ),
+              ],
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  onConfirm(nameCtrl.text.trim());
+                  Navigator.pop(ctx);
+                }
+              },
+              child: const Text('创建'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showVolumeMenu(Volume v) {
+    showMenu<String>(
+      context: context,
+      position: const RelativeRect.fromLTRB(150, 400, 250, 400),
+      items: [
+        _menuItem(Icons.edit, '重命名', 'rename'),
+        _menuItem(Icons.delete_outline, '删除', 'delete'),
+      ],
+      elevation: 8, color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: const BorderSide(color: AppColors.outlineVariant)),
+    ).then((action) {
+      if (action == null || !mounted) return;
+      if (action == 'delete') {
+        setState(() => EditorRepository.i.deleteVolume(v.id));
+        widget.onChanged?.call();
+      } else if (action == 'rename') {
+        _showRenameDialog('重命名卷', v.title, (newName) {
+          EditorRepository.i.renameVolume(v.id, newName);
+          setState(() {});
+          widget.onChanged?.call();
+        });
+      }
+    });
+  }
+
+  void _showChapterMenu(Chapter c) {
+    showMenu<String>(
+      context: context,
+      position: const RelativeRect.fromLTRB(180, 450, 280, 450),
+      items: [
+        _menuItem(Icons.edit, '重命名', 'rename'),
+        _menuItem(Icons.delete_outline, '删除', 'delete'),
+      ],
+      elevation: 8, color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: const BorderSide(color: AppColors.outlineVariant)),
+    ).then((action) {
+      if (action == null || !mounted) return;
+      if (action == 'delete') {
+        setState(() => EditorRepository.i.deleteChapter(c.id));
+        widget.onChanged?.call();
+      } else if (action == 'rename') {
+        _showRenameDialog('重命名章节', c.title, (newName) {
+          EditorRepository.i.renameChapter(c.id, newName);
+          setState(() {});
+          widget.onChanged?.call();
+        });
+      }
+    });
+  }
+
+  void _showRenameDialog(String title, String current, ValueChanged<String> onConfirm) {
+    final ctrl = TextEditingController(text: current);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(controller: ctrl, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          FilledButton(onPressed: () {
+            if (ctrl.text.trim().isNotEmpty) {
+              onConfirm(ctrl.text.trim());
+              Navigator.pop(ctx);
+            }
+          }, child: const Text('确定')),
+        ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _menuItem(IconData icon, String label, String value) =>
+      PopupMenuItem<String>(value: value, height: 36,
+        child: Row(children: [Icon(icon, size: 18, color: AppColors.onSurfaceVariant), const SizedBox(width: 12),
+          Text(label, style: const TextStyle(fontFamily: 'Manrope', fontSize: 14))]));
 
   @override
   Widget build(BuildContext context) {
     final book = EditorRepository.i.current;
     return Container(
-      width: AppSpacing.sidebarWidth,
-      color: AppColors.surface,
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(right: BorderSide(color: AppColors.outlineVariant)),
+      ),
       child: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Row(children: [
-            InkWell(
-              onTap: widget.onBack, borderRadius: BorderRadius.circular(999),
+            InkWell(onTap: widget.onBack, borderRadius: BorderRadius.circular(999),
               child: const Padding(padding: EdgeInsets.all(4),
-                child: Icon(Icons.arrow_back, size: 24, color: AppColors.onSurfaceVariant)),
-            ),
+                child: Icon(Icons.arrow_back, size: 24, color: AppColors.onSurfaceVariant))),
             const SizedBox(width: 12),
             Expanded(child: Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontFamily: 'Manrope', fontSize: 20,
@@ -46,7 +237,6 @@ class _ChapterTreeState extends State<ChapterTree> {
           ]),
         ),
         const SizedBox(height: 20),
-        // 正文/剧作 switcher
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
@@ -62,7 +252,7 @@ class _ChapterTreeState extends State<ChapterTree> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SizedBox(width: double.infinity, child: FilledButton.icon(
-            onPressed: () {},
+            onPressed: _showNewMenu,
             icon: const Icon(Icons.add, size: 20),
             label: const Text('新建', style: TextStyle(fontFamily: 'Manrope', fontSize: 15, fontWeight: FontWeight.w600)),
             style: FilledButton.styleFrom(
@@ -119,7 +309,7 @@ class _ChapterTreeState extends State<ChapterTree> {
                 const SizedBox(width: 8),
                 Expanded(child: Text(v.title, style: const TextStyle(fontFamily: 'Manrope',
                     fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onSurface))),
-                InkWell(onTap: () {}, borderRadius: BorderRadius.circular(4),
+                InkWell(onTap: () => _showVolumeMenu(v), borderRadius: BorderRadius.circular(4),
                   child: const Padding(padding: EdgeInsets.all(2),
                     child: Icon(Icons.more_vert, size: 18, color: AppColors.outline))),
               ]),
@@ -148,7 +338,7 @@ class _ChapterTreeState extends State<ChapterTree> {
                     Expanded(child: Text(c.title, style: TextStyle(fontFamily: 'Manrope', fontSize: 15,
                         fontWeight: FontWeight.w400,
                         color: active ? AppColors.primary : AppColors.onSurfaceVariant))),
-                    InkWell(onTap: () {}, borderRadius: BorderRadius.circular(4),
+                    InkWell(onTap: () => _showChapterMenu(c), borderRadius: BorderRadius.circular(4),
                       child: const Padding(padding: EdgeInsets.all(2),
                         child: Icon(Icons.more_vert, size: 16, color: AppColors.outline))),
                   ]),

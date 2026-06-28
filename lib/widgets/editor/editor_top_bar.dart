@@ -50,18 +50,17 @@ class _EditorTopBarState extends State<EditorTopBar> {
                     child: Icon(Icons.expand_less, size: 18, color: AppColors.onSurfaceVariant)))),
           Expanded(child: _buildSearch()),
           const SizedBox(width: AppSpacing.stackMd),
-          InkWell(
-            onTap: () => setState(() => _findReplaceMode = !_findReplaceMode),
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _findReplaceMode ? AppColors.primary : AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(999)),
-              child: Text(_findReplaceMode ? '替换' : '查找',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                    color: _findReplaceMode ? Colors.white : AppColors.onSurfaceVariant)),
+          // Segmented control: 查找 | 替换
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(999),
             ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              _modeChip('查找', !_findReplaceMode),
+              _modeChip('替换', _findReplaceMode),
+            ]),
           ),
           const SizedBox(width: AppSpacing.stackMd),
           _iconBtn(Icons.delete_outline, '回收站'),
@@ -170,6 +169,20 @@ class _EditorTopBarState extends State<EditorTopBar> {
 
   Widget _iconBtn(IconData icon, String t) =>
       IconButton(onPressed: () {}, icon: Icon(icon, size: 22), splashRadius: 20, color: AppColors.onSurfaceVariant, tooltip: t);
+
+  Widget _modeChip(String label, bool active) => GestureDetector(
+    onTap: () => setState(() => _findReplaceMode = (label == '替换')),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: active ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: active ? [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 2)] : null,
+      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+          color: active ? AppColors.primary : AppColors.onSurfaceVariant)),
+    ),
+  );
 
   Widget _chip(String label, Color bg, Color fg) => GestureDetector(
     onTap: () {},
