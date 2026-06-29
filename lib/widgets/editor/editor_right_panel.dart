@@ -58,20 +58,101 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
         side: const BorderSide(color: AppColors.outlineVariant)),
       items: [
-        PopupMenuItem(value: -1, height: 36,
+        PopupMenuItem(value: 0, height: 36,
           child: Row(children: [
-            Icon(_filterIndex == null ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 18, color: AppColors.primary),
+            Icon(_filterIndex == 0 ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 18, color: AppColors.primary),
             const SizedBox(width: 10),
-            const Text('跟随当前选择', style: TextStyle(fontSize: 13)),
+            const Text('总纲', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           ])),
-        ...widget.outlineFilterLabels.asMap().entries.map((e) => PopupMenuItem(value: e.key, height: 36,
-          child: Row(children: [
-            Icon(_filterIndex == e.key ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 18, color: AppColors.primary),
-            const SizedBox(width: 10),
-            Text(e.value, style: const TextStyle(fontSize: 13)),
-          ]))),
+        ...widget.outlineFilterLabels.asMap().entries.where((e) => e.key > 0).map((e) {
+          final isChapter = e.value.contains('章纲');
+          return PopupMenuItem(value: e.key, height: 36,
+            child: Row(children: [
+              Icon(_filterIndex == e.key ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  size: 18, color: _filterIndex == e.key ? AppColors.primary : AppColors.outline),
+              const SizedBox(width: 10),
+              if (isChapter) Padding(padding: const EdgeInsets.only(left: 20),
+                  child: Text(e.value, style: TextStyle(fontSize: 13, color: _filterIndex == e.key ? AppColors.primary : AppColors.outline))),
+              if (!isChapter) Text(e.value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                  color: _filterIndex == e.key ? AppColors.primary : AppColors.outline)),
+            ]));
+        }),
       ],
     ).then((v) { if (v != null && mounted) setState(() => _filterIndex = v < 0 ? null : v); });
+  }
+
+  Widget _quickViewHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        const Text('快速查看', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+            letterSpacing: 0.6, color: AppColors.outline)),
+        if (_tabIndex == 0)
+          InkWell(
+            key: _filterBtnKey,
+            onTap: _showFilterMenu,
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(padding: const EdgeInsets.all(2),
+                child: Icon(Icons.filter_list, size: 18,
+                    color: _filterIndex != null ? AppColors.secondary : AppColors.outline)),
+          ),
+      ]),
+    );
+  }
+
+  Widget _outlinePreview() {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Stack(children: [
+          Container(
+            width: double.infinity, height: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+            ),
+            child: SingleChildScrollView(
+              child: Text(widget.outlineContent,
+                style: const TextStyle(fontFamily: 'Source Serif 4', fontSize: 13,
+                    height: 1.6, color: AppColors.onSurfaceVariant)),
+            ),
+          ),
+          Positioned(right: 4, bottom: 4,
+            child: InkWell(
+              onTap: widget.onToggleQuickView,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(padding: const EdgeInsets.all(4),
+                child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
+                    size: 16, color: AppColors.outline)),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _cardGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GridView.count(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.0,
+        children: List.generate(6, (i) => Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+          ),
+        )),
+      ),
+    );
   }
 
   @override
@@ -92,7 +173,6 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
               child: const Center(child: Icon(Icons.chevron_right, size: 16, color: AppColors.onSurfaceVariant)),
             ),
           ),
-        // Segmented control
         Padding(
           padding: const EdgeInsets.all(16),
           child: Container(
@@ -116,78 +196,47 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             })),
           ),
         ),
-        // 总纲 button (drama mode)
-        if (widget.editorMode == EditorMode.drama)
+        // Mode-specific top button
+        if (widget.editorMode == EditorMode.drama && _tabIndex == 0)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SizedBox(width: double.infinity, child: FilledButton.icon(
               onPressed: widget.onSelectBookOutline,
               icon: const Icon(Icons.account_tree, size: 20),
-              label: const Text('总纲', style: TextStyle(fontFamily: 'Manrope', fontSize: 15, fontWeight: FontWeight.w600)),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
+              label: const Text('总纲', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              style: _primaryBtnStyle(),
             )),
           ),
-        // Quick view header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('快速查看', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
-                letterSpacing: 0.6, color: AppColors.outline)),
-            InkWell(
-              key: _filterBtnKey,
-              onTap: _showFilterMenu,
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(padding: const EdgeInsets.all(2),
-                  child: Icon(Icons.filter_list, size: 18,
-                      color: _filterIndex != null ? AppColors.secondary : AppColors.outline)),
-            ),
-          ]),
-        ),
-        const SizedBox(height: 8),
-        // Outline preview — synced content
-        Expanded(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Stack(children: [
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.outlineVariant, width: 0.3),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(widget.outlineContent,
-                      style: const TextStyle(fontFamily: 'Source Serif 4', fontSize: 13,
-                          height: 1.6, color: AppColors.onSurfaceVariant)),
-                  ),
-                ),
-                // Expand button at bottom-right
-                Positioned(
-                  right: 4, bottom: 4,
-                  child: InkWell(
-                    onTap: widget.onToggleQuickView,
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(padding: const EdgeInsets.all(4),
-                      child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
-                          size: 16, color: AppColors.outline)),
-                  ),
-                ),
-              ]),
-            ),
+        if (_tabIndex == 1)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(width: double.infinity, child: FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('新建卡片', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              style: _primaryBtnStyle(),
+            )),
           ),
-        ),
-        // Function grid — animated hide when expanded
+        // Tab content
+        if (_tabIndex == 0) ...[
+          _quickViewHeader(),
+          const SizedBox(height: 8),
+          Expanded(child: _outlinePreview()),
+        ],
+        if (_tabIndex == 1) ...[
+          _quickViewHeader(),
+          const SizedBox(height: 8),
+          Expanded(child: _cardGrid()),
+        ],
+        if (_tabIndex == 2)
+          Expanded(
+            child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.hub, size: 48, color: AppColors.outline.withAlpha(60)),
+              const SizedBox(height: 8),
+              Text('图谱显示框', style: TextStyle(fontSize: 12, color: AppColors.outline.withAlpha(120))),
+            ])),
+          ),
+        // Function grid
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
@@ -218,7 +267,6 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
           ),
           ]),
         ),
-        // Settings — always visible
         Container(
           decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
           child: InkWell(
@@ -241,6 +289,12 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
     final s = sec % 60;
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
+
+  ButtonStyle _primaryBtnStyle() => FilledButton.styleFrom(
+    backgroundColor: AppColors.primary,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+    padding: const EdgeInsets.symmetric(vertical: 10),
+  );
 
   Widget _fnBtn(IconData icon, String label, VoidCallback? onTap, {bool active = false}) {
     return InkWell(

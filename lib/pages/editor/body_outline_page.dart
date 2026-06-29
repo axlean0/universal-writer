@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/editor_models.dart';
 import '../../theme/app_theme.dart';
@@ -7,7 +6,6 @@ class BodyOutlinePage extends StatefulWidget {
   final Chapter chapter;
   final bool readOnly;
   final ValueChanged<int>? onWordCountChanged;
-  final ValueChanged<int>? onTimeChanged;
   final ValueChanged<bool>? onUndoRedoChanged;
 
   const BodyOutlinePage({
@@ -15,7 +13,6 @@ class BodyOutlinePage extends StatefulWidget {
     required this.chapter,
     this.readOnly = false,
     this.onWordCountChanged,
-    this.onTimeChanged,
     this.onUndoRedoChanged,
   });
 
@@ -26,10 +23,7 @@ class BodyOutlinePage extends StatefulWidget {
 class BodyOutlinePageState extends State<BodyOutlinePage> {
   late TextEditingController _titleCtrl;
   late TextEditingController _bodyCtrl;
-  Timer? _timer;
-  int _elapsedSeconds = 0;
 
-  // Undo/redo stacks
   final List<_TextSnapshot> _undoStack = [];
   final List<_TextSnapshot> _redoStack = [];
   DateTime _lastSnapshot = DateTime.now();
@@ -44,7 +38,6 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
     _titleCtrl = TextEditingController(text: widget.chapter.title);
     _bodyCtrl = TextEditingController(text: widget.chapter.body);
     _bodyCtrl.addListener(_onTextChanged);
-    _startTimer();
     _notifyStats();
   }
 
@@ -56,20 +49,9 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
       _bodyCtrl.text = widget.chapter.body;
       _undoStack.clear();
       _redoStack.clear();
-      _elapsedSeconds = 0;
       _notifyStats();
       _notifyUndoRedo();
     }
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        _elapsedSeconds++;
-        widget.onTimeChanged?.call(_elapsedSeconds);
-      }
-    });
   }
 
   void _onTextChanged() {
@@ -122,24 +104,19 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
 
   void _notifyStats() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        widget.onWordCountChanged?.call(_wordCount);
-      }
+      if (mounted) widget.onWordCountChanged?.call(_wordCount);
     });
   }
 
   void _notifyUndoRedo() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        widget.onUndoRedoChanged?.call(_canUndo || _canRedo);
-      }
+      if (mounted) widget.onUndoRedoChanged?.call(_canUndo || _canRedo);
     });
   }
 
   int get _wordCount {
     final text = _bodyCtrl.text;
     if (text.isEmpty) return 0;
-    // Count Chinese chars + space-separated words
     int count = 0;
     bool inWord = false;
     for (int i = 0; i < text.length; i++) {
@@ -147,7 +124,6 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
       if (c == ' ' || c == '\n' || c == '\t') {
         if (inWord) { count++; inWord = false; }
       } else if (c.codeUnitAt(0) > 127) {
-        // CJK character
         count++;
         inWord = false;
       } else {
@@ -158,17 +134,8 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
     return count;
   }
 
-  String get timeDisplay {
-    final h = _elapsedSeconds ~/ 3600;
-    final m = (_elapsedSeconds % 3600) ~/ 60;
-    final s = _elapsedSeconds % 60;
-    if (h > 0) return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
-
   @override
   void dispose() {
-    _timer?.cancel();
     _titleCtrl.removeListener(_onTextChanged);
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
@@ -219,7 +186,6 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
     );
   }
 
-  // Expose for external callers
   void handleUndo() => undo();
   void handleRedo() => redo();
   bool get canUndo => _canUndo;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/editor_models.dart';
 import '../../data/editor_repository.dart';
@@ -54,6 +55,9 @@ class _EditorShellState extends State<EditorShell> {
   bool _canRedo = false;
   final GlobalKey<BodyOutlinePageState> _editorKey = GlobalKey();
 
+  // Global timer — starts on editor entry, never resets
+  Timer? _timer;
+
   // Quick view content — synced with current selection
   String get _outlineContent {
     final book = EditorRepository.i.current;
@@ -102,10 +106,13 @@ class _EditorShellState extends State<EditorShell> {
     EditorRepository.i.load(widget.bookId);
     final first = EditorRepository.i.current.volumes.firstOrNull?.chapters.firstOrNull;
     if (first != null) _activeChapterId = first.id;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _elapsedTime++);
+    });
   }
 
   @override
-  void dispose() { _searchCtrl.dispose(); super.dispose(); }
+  void dispose() { _timer?.cancel(); _searchCtrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +159,6 @@ class _EditorShellState extends State<EditorShell> {
                                 chapter: _activeChapter!,
                                 readOnly: _readOnly,
                                 onWordCountChanged: (c) => setState(() => _wordCount = c),
-                                onTimeChanged: (t) => setState(() => _elapsedTime = t),
                                 onUndoRedoChanged: (v) => setState(() {
                                   _canUndo = _editorKey.currentState?.canUndo ?? false;
                                   _canRedo = _editorKey.currentState?.canRedo ?? false;

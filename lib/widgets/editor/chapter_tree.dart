@@ -158,10 +158,14 @@ class _ChapterTreeState extends State<ChapterTree> {
     );
   }
 
-  void _showVolumeMenu(Volume v) {
+  void _showVolumeMenu(Volume v, BuildContext btnCtx) {
+    final box = btnCtx.findRenderObject() as RenderBox;
+    final off = box.localToGlobal(Offset.zero);
     showMenu<String>(
       context: context,
-      position: const RelativeRect.fromLTRB(150, 400, 250, 400),
+      position: RelativeRect.fromLTRB(
+          off.dx, off.dy + box.size.height + 4,
+          off.dx + box.size.width, off.dy + box.size.height + 4),
       items: [
         _menuItem(Icons.edit, '重命名', 'rename'),
         _menuItem(Icons.delete_outline, '删除', 'delete'),
@@ -184,10 +188,14 @@ class _ChapterTreeState extends State<ChapterTree> {
     });
   }
 
-  void _showChapterMenu(Chapter c) {
+  void _showChapterMenu(Chapter c, BuildContext btnCtx) {
+    final box = btnCtx.findRenderObject() as RenderBox;
+    final off = box.localToGlobal(Offset.zero);
     showMenu<String>(
       context: context,
-      position: const RelativeRect.fromLTRB(180, 450, 280, 450),
+      position: RelativeRect.fromLTRB(
+          off.dx, off.dy + box.size.height + 4,
+          off.dx + box.size.width, off.dy + box.size.height + 4),
       items: [
         _menuItem(Icons.edit, '重命名', 'rename'),
         _menuItem(Icons.delete_outline, '删除', 'delete'),
@@ -360,9 +368,11 @@ class _ChapterTreeState extends State<ChapterTree> {
                       color: isActive ? AppColors.primary : AppColors.onSurface)),
                 ),
               ),
-              InkWell(onTap: () => _showVolumeMenu(v), borderRadius: BorderRadius.circular(4),
+              Builder(builder: (ctx) => InkWell(
+                onTap: () => _showVolumeMenu(v, ctx),
+                borderRadius: BorderRadius.circular(4),
                 child: const Padding(padding: EdgeInsets.all(2),
-                  child: Icon(Icons.more_vert, size: 18, color: AppColors.outline))),
+                  child: Icon(Icons.more_vert, size: 18, color: AppColors.outline)))),
             ]),
           ),
         ),
@@ -388,9 +398,11 @@ class _ChapterTreeState extends State<ChapterTree> {
                     Expanded(child: Text(c.title, style: TextStyle(fontFamily: 'Manrope', fontSize: 15,
                         fontWeight: FontWeight.w400,
                         color: active ? AppColors.primary : AppColors.onSurfaceVariant))),
-                    InkWell(onTap: () => _showChapterMenu(c), borderRadius: BorderRadius.circular(4),
+                    Builder(builder: (ctx) => InkWell(
+                      onTap: () => _showChapterMenu(c, ctx),
+                      borderRadius: BorderRadius.circular(4),
                       child: const Padding(padding: EdgeInsets.all(2),
-                        child: Icon(Icons.more_vert, size: 16, color: AppColors.outline))),
+                        child: Icon(Icons.more_vert, size: 16, color: AppColors.outline)))),
                   ]),
                 ),
               ),
