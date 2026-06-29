@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/editor_repository.dart';
+import '../../models/editor_models.dart';
 import '../../theme/app_theme.dart';
 
 class EditorRightPanel extends StatefulWidget {
@@ -10,6 +11,7 @@ class EditorRightPanel extends StatefulWidget {
   final VoidCallback? onSave;
   final VoidCallback? onUndo;
   final VoidCallback? onRedo;
+  final VoidCallback? onSelectBookOutline;
   final bool isReadOnly;
   final bool quickViewExpanded;
   final VoidCallback? onToggleQuickView;
@@ -17,14 +19,17 @@ class EditorRightPanel extends StatefulWidget {
   final int elapsedSeconds;
   final bool canUndo;
   final bool canRedo;
+  final EditorMode editorMode;
 
   const EditorRightPanel({
     super.key,
     this.onToggleCollapse, this.onToggleReadOnly, this.onToggleFullscreen,
     this.onToggleFocus, this.onSave, this.onUndo, this.onRedo,
+    this.onSelectBookOutline,
     this.isReadOnly = false, this.quickViewExpanded = false, this.onToggleQuickView,
     this.wordCount = 0, this.elapsedSeconds = 0,
     this.canUndo = false, this.canRedo = false,
+    this.editorMode = EditorMode.body,
   });
 
   @override
@@ -83,6 +88,21 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             })),
           ),
         ),
+        // 总纲 button (drama mode only)
+        if (widget.editorMode == EditorMode.drama)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(width: double.infinity, child: FilledButton.icon(
+              onPressed: widget.onSelectBookOutline,
+              icon: const Icon(Icons.account_tree, size: 20),
+              label: const Text('总纲', style: TextStyle(fontFamily: 'Manrope', fontSize: 15, fontWeight: FontWeight.w600)),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            )),
+          ),
         // Quick view
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

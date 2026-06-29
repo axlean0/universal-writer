@@ -14,8 +14,10 @@ String _toCn(int n) {
 
 class ChapterTree extends StatefulWidget {
   final String? activeChapterId;
+  final String? activeVolumeId;
   final EditorMode initialMode;
   final ValueChanged<Chapter> onSelectChapter;
+  final ValueChanged<Volume>? onSelectVolume;
   final VoidCallback onBack;
   final VoidCallback? onChanged;
   final ValueChanged<EditorMode>? onModeChanged;
@@ -23,8 +25,10 @@ class ChapterTree extends StatefulWidget {
   const ChapterTree({
     super.key,
     this.activeChapterId,
+    this.activeVolumeId,
     this.initialMode = EditorMode.body,
     required this.onSelectChapter,
+    this.onSelectVolume,
     required this.onBack,
     this.onChanged,
     this.onModeChanged,
@@ -37,6 +41,7 @@ class ChapterTree extends StatefulWidget {
 class _ChapterTreeState extends State<ChapterTree> {
   late EditorMode _mode;
   final Set<String> _expandedVolumeIds = {};
+  final GlobalKey _newBtnKey = GlobalKey();
 
   @override
   void initState() {
@@ -45,9 +50,12 @@ class _ChapterTreeState extends State<ChapterTree> {
   }
 
   void _showNewMenu() {
+    final RenderBox box = _newBtnKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = box.localToGlobal(Offset.zero);
     showMenu<String>(
       context: context,
-      position: const RelativeRect.fromLTRB(100, 300, 200, 300),
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy + box.size.height,
+          offset.dx + box.size.width, offset.dy + box.size.height),
       elevation: 8, color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
         side: const BorderSide(color: AppColors.outlineVariant)),
@@ -261,7 +269,7 @@ class _ChapterTreeState extends State<ChapterTree> {
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(width: double.infinity, child: FilledButton.icon(
+          child: SizedBox(key: _newBtnKey, width: double.infinity, child: FilledButton.icon(
             onPressed: _showNewMenu,
             icon: const Icon(Icons.add, size: 20),
             label: const Text('新建', style: TextStyle(fontFamily: 'Manrope', fontSize: 15, fontWeight: FontWeight.w600)),
@@ -306,27 +314,54 @@ class _ChapterTreeState extends State<ChapterTree> {
 
   List<Widget> _buildVolume(Volume v) {
     final expanded = _expandedVolumeIds.contains(v.id);
+    final isActive = widget.activeVolumeId == v.id && _mode == EditorMode.drama;
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: 2),
-        child: Material(color: Colors.transparent, borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            onTap: () => setState(() {
-              if (expanded) { _expandedVolumeIds.remove(v.id); } else { _expandedVolumeIds.add(v.id); }
-            }),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(children: [
-                Icon(expanded ? Icons.expand_more : Icons.chevron_right, size: 20, color: AppColors.outline),
-                const SizedBox(width: 8),
-                Expanded(child: Text(v.title, style: const TextStyle(fontFamily: 'Manrope',
-                    fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onSurface))),
-                InkWell(onTap: () => _showVolumeMenu(v), borderRadius: BorderRadius.circular(4),
-                  child: const Padding(padding: EdgeInsets.all(2),
-                    child: Icon(Icons.more_vert, size: 18, color: AppColors.outline))),
-              ]),
+        child: Material(
+          color: isActive ? AppColors.secondaryContainer.withAlpha(40) : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: isActive ? const Border(left: BorderSide(color: AppColors.secondary, width: 2)) : null,
             ),
+            child: Row(children: [
+              // Arrow — expand/collapse only
+              InkWell(
+                borderRadius: BorderRadius.circular(4),
+                onTap: () => setState(() {
+                  if (expanded) { _expandedVolumeIds.remove(v.id); } else { _expandedVolumeIds.add(v.id); }
+                }),
+                child: Padding(padding: const EdgeInsets.all(2),
+                  child: Icon(expanded ? Icons.expand_more : Icons.chevron_right, size: 20, color: AppColors.outline)),
+              ),
+              const SizedBox(width: 8),
+              // Volume title — select for editing or toggle expand
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    if (widget.onSelectVolume != null) {
+                      // Select volume for drama mode editing
+                      widget.onSelectVolume!(v);
+                      // Also expand to show chapters
+                      setState(() => _expandedVolumeIds.add(v.id));
+                    } else {
+                      setState(() {
+                        if (expanded) { _expandedVolumeIds.remove(v.id); } else { _expandedVolumeIds.add(v.id); }
+                      });
+                    }
+                  },
+                  child: Text(v.title, style: TextStyle(fontFamily: 'Manrope', fontSize: 15,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                      color: isActive ? AppColors.primary : AppColors.onSurface)),
+                ),
+              ),
+              InkWell(onTap: () => _showVolumeMenu(v), borderRadius: BorderRadius.circular(4),
+                child: const Padding(padding: EdgeInsets.all(2),
+                  child: Icon(Icons.more_vert, size: 18, color: AppColors.outline))),
+            ]),
           ),
         ),
       ),

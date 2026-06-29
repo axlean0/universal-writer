@@ -25,14 +25,27 @@ class _EditorShellState extends State<EditorShell> {
   EditorMode _editorMode = EditorMode.body;
 
   String? _activeChapterId;
+  String? _activeVolumeId; // for drama mode — volume selection independent of chapter
   Chapter? get _activeChapter => EditorRepository.i.chapterById(_activeChapterId ?? '');
   Volume? get _activeVolume {
-    if (_activeChapter == null) return null;
-    for (final v in EditorRepository.i.current.volumes) {
-      if (v.chapters.any((c) => c.id == _activeChapterId)) return v;
+    if (_activeVolumeId != null) return EditorRepository.i.current.volumes.firstWhere((v) => v.id == _activeVolumeId);
+    if (_activeChapter != null) {
+      for (final v in EditorRepository.i.current.volumes) {
+        if (v.chapters.any((c) => c.id == _activeChapterId)) return v;
+      }
     }
     return null;
   }
+
+  void _selectChapter(Chapter c) => setState(() {
+    _activeChapterId = c.id; _activeVolumeId = null;
+  });
+  void _selectVolume(Volume v) => setState(() {
+    _activeVolumeId = v.id; _activeChapterId = null;
+  });
+  void _selectBook() => setState(() {
+    _activeChapterId = null; _activeVolumeId = null;
+  });
 
   // Stats passed from BodyOutlinePage to RightPanel
   int _wordCount = 0;
@@ -68,8 +81,6 @@ class _EditorShellState extends State<EditorShell> {
     if (first != null) _activeChapterId = first.id;
   }
 
-  void _selectChapter(Chapter c) => setState(() => _activeChapterId = c.id);
-
   @override
   void dispose() { _searchCtrl.dispose(); super.dispose(); }
 
@@ -85,8 +96,10 @@ class _EditorShellState extends State<EditorShell> {
               width: AppSpacing.sidebarWidth,
               child: ChapterTree(
                 activeChapterId: _activeChapterId,
+                activeVolumeId: _activeVolumeId,
                 initialMode: _editorMode,
                 onSelectChapter: _selectChapter,
+                onSelectVolume: _selectVolume,
                 onBack: () => Navigator.of(context).pop(),
                 onChanged: () => setState(() {}),
                 onModeChanged: (mode) => setState(() => _editorMode = mode),
@@ -137,6 +150,8 @@ class _EditorShellState extends State<EditorShell> {
                         isReadOnly: _readOnly, quickViewExpanded: _quickViewExpanded,
                         wordCount: _wordCount, elapsedSeconds: _elapsedTime,
                         canUndo: _canUndo, canRedo: _canRedo,
+                        editorMode: _editorMode,
+                        onSelectBookOutline: _selectBook,
                         onUndo: () { _editorKey.currentState?.handleUndo(); },
                         onRedo: () { _editorKey.currentState?.handleRedo(); },
                         onToggleReadOnly: () => setState(() => _readOnly = !_readOnly),
