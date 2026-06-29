@@ -87,7 +87,6 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         const Text('快速查看', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
             letterSpacing: 0.6, color: AppColors.outline)),
-        if (_tabIndex == 0)
           InkWell(
             key: _filterBtnKey,
             onTap: _showFilterMenu,
@@ -139,19 +138,30 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
   Widget _cardGrid() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 1.0,
-        children: List.generate(6, (i) => Container(
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+      child: Stack(children: [
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 1.0,
+          children: List.generate(6, (i) => Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+            ),
+          )),
+        ),
+        Positioned(right: 4, bottom: 4,
+          child: InkWell(
+            onTap: widget.onToggleQuickView,
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(padding: const EdgeInsets.all(4),
+              child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
+                  size: 16, color: AppColors.outline)),
           ),
-        )),
-      ),
+        ),
+      ]),
     );
   }
 

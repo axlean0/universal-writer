@@ -86,8 +86,7 @@ class _ChapterTreeState extends State<ChapterTree> {
           EditorRepository.i.addVolume(full);
           _expandedVolumeIds.add(book.volumes.last.id);
         } else {
-          final vid = book.volumes.firstWhere((x) => _expandedVolumeIds.contains(x.id),
-              orElse: () => book.volumes.first).id;
+          final vid = book.volumes.last.id;
           EditorRepository.i.addChapter(vid, full);
           _expandedVolumeIds.add(vid);
           widget.onSelectChapter(book.volumes.firstWhere((x) => x.id == vid).chapters.last);
