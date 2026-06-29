@@ -52,20 +52,22 @@ class _ChapterTreeState extends State<ChapterTree> {
   void _showNewMenu() {
     final RenderBox box = _newBtnKey.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = box.localToGlobal(Offset.zero);
+    final btnWidth = box.size.width;
     showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy + box.size.height,
-          offset.dx + box.size.width, offset.dy + box.size.height),
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy + box.size.height + 4,
+          offset.dx + btnWidth, offset.dy + box.size.height + 4),
+      constraints: BoxConstraints(minWidth: btnWidth),
       elevation: 8, color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
         side: const BorderSide(color: AppColors.outlineVariant)),
       items: const [
-        PopupMenuItem(value: 'volume', height: 36,
-          child: Row(children: [Icon(Icons.create_new_folder, size: 18, color: AppColors.primary), SizedBox(width: 12),
-            Text('新建卷', style: TextStyle(fontFamily: 'Manrope', fontSize: 14))])),
-        PopupMenuItem(value: 'chapter', height: 36,
-          child: Row(children: [Icon(Icons.note_add, size: 18, color: AppColors.primary), SizedBox(width: 12),
-            Text('新建章', style: TextStyle(fontFamily: 'Manrope', fontSize: 14))])),
+        PopupMenuItem(value: 'volume', height: 40,
+          child: Row(children: [Icon(Icons.create_new_folder, size: 20, color: AppColors.primary), SizedBox(width: 12),
+            Text('新建卷', style: TextStyle(fontFamily: 'Manrope', fontSize: 15))])),
+        PopupMenuItem(value: 'chapter', height: 40,
+          child: Row(children: [Icon(Icons.note_add, size: 20, color: AppColors.primary), SizedBox(width: 12),
+            Text('新建章', style: TextStyle(fontFamily: 'Manrope', fontSize: 15))])),
       ],
     ).then((v) {
       if (v == null || !mounted) return;

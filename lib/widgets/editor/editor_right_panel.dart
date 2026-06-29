@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../data/editor_repository.dart';
 import '../../models/editor_models.dart';
 import '../../theme/app_theme.dart';
 
@@ -20,6 +19,8 @@ class EditorRightPanel extends StatefulWidget {
   final bool canUndo;
   final bool canRedo;
   final EditorMode editorMode;
+  final String outlineContent;
+  final List<String> outlineFilterLabels;
 
   const EditorRightPanel({
     super.key,
@@ -30,6 +31,8 @@ class EditorRightPanel extends StatefulWidget {
     this.wordCount = 0, this.elapsedSeconds = 0,
     this.canUndo = false, this.canRedo = false,
     this.editorMode = EditorMode.body,
+    this.outlineContent = '',
+    this.outlineFilterLabels = const [],
   });
 
   @override
@@ -37,13 +40,37 @@ class EditorRightPanel extends StatefulWidget {
 }
 
 class _EditorRightPanelState extends State<EditorRightPanel> {
-  int _tabIndex = 0; // 0=大纲, 1=卡片, 2=图谱
-
+  int _tabIndex = 0;
+  int? _filterIndex; // null = follow selection, otherwise index into outlineFilterLabels
   static const _tabs = ['大纲', '卡片', '图谱'];
+
+  void _showFilterMenu() {
+    if (widget.outlineFilterLabels.isEmpty) return;
+    showMenu<int>(
+      context: context,
+      position: const RelativeRect.fromLTRB(800, 400, 900, 400),
+      elevation: 8, color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: const BorderSide(color: AppColors.outlineVariant)),
+      items: [
+        PopupMenuItem(value: -1, height: 36,
+          child: Row(children: [
+            Icon(_filterIndex == null ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 18, color: AppColors.primary),
+            const SizedBox(width: 10),
+            const Text('跟随当前选择', style: TextStyle(fontSize: 13)),
+          ])),
+        ...widget.outlineFilterLabels.asMap().entries.map((e) => PopupMenuItem(value: e.key, height: 36,
+          child: Row(children: [
+            Icon(_filterIndex == e.key ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 18, color: AppColors.primary),
+            const SizedBox(width: 10),
+            Text(e.value, style: const TextStyle(fontSize: 13)),
+          ]))),
+      ],
+    ).then((v) { if (v != null && mounted) setState(() => _filterIndex = v < 0 ? null : v); });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final book = EditorRepository.i.current;
     return Container(
       width: AppSpacing.sidebarWidth,
       decoration: const BoxDecoration(
@@ -56,12 +83,8 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             onTap: widget.onToggleCollapse,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.outlineVariant, width: 0.3)),
-              ),
-              child: const Center(
-                child: Icon(Icons.chevron_right, size: 16, color: AppColors.onSurfaceVariant),
-              ),
+              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
+              child: const Center(child: Icon(Icons.chevron_right, size: 16, color: AppColors.onSurfaceVariant)),
             ),
           ),
         // Segmented control
@@ -88,7 +111,7 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             })),
           ),
         ),
-        // 总纲 button (drama mode only)
+        // 总纲 button (drama mode)
         if (widget.editorMode == EditorMode.drama)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -103,31 +126,29 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
               ),
             )),
           ),
-        // Quick view
+        // Quick view header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             const Text('快速查看', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
                 letterSpacing: 0.6, color: AppColors.outline)),
-            Row(children: [
-              InkWell(onTap: () {}, borderRadius: BorderRadius.circular(4),
-                child: const Padding(padding: EdgeInsets.all(2),
-                    child: Icon(Icons.filter_list, size: 18, color: AppColors.outline))),
-              InkWell(onTap: widget.onToggleQuickView, borderRadius: BorderRadius.circular(4),
-                child: Padding(padding: const EdgeInsets.all(2),
-                  child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
-                      size: 18, color: AppColors.outline))),
-            ]),
+            InkWell(
+              onTap: _showFilterMenu,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(padding: const EdgeInsets.all(2),
+                  child: Icon(Icons.filter_list, size: 18,
+                      color: _filterIndex != null ? AppColors.secondary : AppColors.outline)),
+            ),
           ]),
         ),
         const SizedBox(height: 8),
-        // Outline preview
+        // Outline preview — synced content
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              height: widget.quickViewExpanded ? null : double.infinity,
-              child: Container(
+            child: Stack(children: [
+              Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceContainerLow,
@@ -135,36 +156,50 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
                   border: Border.all(color: AppColors.outlineVariant, width: 0.3),
                 ),
                 child: SingleChildScrollView(
-                  child: Text(book.outlinePreview,
+                  child: Text(widget.outlineContent,
                     style: const TextStyle(fontFamily: 'Source Serif 4', fontSize: 13,
                         height: 1.6, color: AppColors.onSurfaceVariant)),
                 ),
               ),
+              // Expand button at bottom-right
+              Positioned(
+                right: 4, bottom: 4,
+                child: InkWell(
+                  onTap: widget.onToggleQuickView,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(padding: const EdgeInsets.all(4),
+                    child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
+                        size: 16, color: AppColors.outline)),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        // Function grid — hidden when expanded
+        if (!widget.quickViewExpanded) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
+            child: GridView.count(
+              crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 4, crossAxisSpacing: 4, childAspectRatio: 2.2,
+              children: [
+                _fnBtn(Icons.fullscreen, '全屏', widget.onToggleFullscreen),
+                _fnBtn(Icons.self_improvement, '专注', widget.onToggleFocus),
+                _fnBtn(Icons.undo, '撤销', widget.canUndo ? widget.onUndo : null),
+                _fnBtn(Icons.redo, '重做', widget.canRedo ? widget.onRedo : null),
+                _fnBtn(Icons.visibility, '显示', null),
+                _fnBtn(Icons.lock, '只读', widget.onToggleReadOnly, active: widget.isReadOnly),
+                _fnBtn(Icons.save, '保存', widget.onSave),
+                _fnBtn(Icons.more_horiz, '更多', null),
+                _fnBtn(Icons.text_fields, '${widget.wordCount} 字', null),
+                _fnBtn(Icons.timer, _fmtTime(widget.elapsedSeconds), null),
+              ],
             ),
           ),
-        ),
-        // Function grid
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
-          child: GridView.count(
-            crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 4, crossAxisSpacing: 4, childAspectRatio: 2.2,
-            children: [
-              _fnBtn(Icons.fullscreen, '全屏', widget.onToggleFullscreen),
-              _fnBtn(Icons.self_improvement, '专注', widget.onToggleFocus),
-              _fnBtn(Icons.undo, '撤销', widget.canUndo ? widget.onUndo : null),
-              _fnBtn(Icons.redo, '重做', widget.canRedo ? widget.onRedo : null),
-              _fnBtn(Icons.visibility, '显示', null),
-              _fnBtn(Icons.lock, '只读', widget.onToggleReadOnly, active: widget.isReadOnly),
-              _fnBtn(Icons.save, '保存', widget.onSave),
-              _fnBtn(Icons.more_horiz, '更多', null),
-              _fnBtn(Icons.text_fields, '${widget.wordCount} 字', null),
-              _fnBtn(Icons.timer, _fmtTime(widget.elapsedSeconds), null),
-            ],
-          ),
-        ),
-        // Settings
+        ],
+        // Settings — always visible
         Container(
           decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
           child: InkWell(

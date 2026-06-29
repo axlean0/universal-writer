@@ -54,6 +54,29 @@ class _EditorShellState extends State<EditorShell> {
   bool _canRedo = false;
   final GlobalKey<BodyOutlinePageState> _editorKey = GlobalKey();
 
+  // Quick view content — synced with current selection
+  String get _outlineContent {
+    final book = EditorRepository.i.current;
+    if (_editorMode == EditorMode.drama) {
+      if (_activeChapter != null) return _activeChapter!.dramaOutline;
+      if (_activeVolume != null) return _activeVolume!.dramaOutline;
+      return book.dramaOutline;
+    }
+    return book.outlinePreview;
+  }
+
+  List<String> get _outlineFilterLabels {
+    final book = EditorRepository.i.current;
+    final labels = <String>['总纲'];
+    for (final v in book.volumes) {
+      labels.add('${v.title}·卷纲');
+      for (final c in v.chapters) {
+        labels.add('${c.title}·章纲');
+      }
+    }
+    return labels;
+  }
+
   final _searchCtrl = TextEditingController();
   List<Chapter> _searchResults = [];
 
@@ -151,6 +174,8 @@ class _EditorShellState extends State<EditorShell> {
                         wordCount: _wordCount, elapsedSeconds: _elapsedTime,
                         canUndo: _canUndo, canRedo: _canRedo,
                         editorMode: _editorMode,
+                        outlineContent: _outlineContent,
+                        outlineFilterLabels: _outlineFilterLabels,
                         onSelectBookOutline: _selectBook,
                         onUndo: () { _editorKey.currentState?.handleUndo(); },
                         onRedo: () { _editorKey.currentState?.handleRedo(); },
