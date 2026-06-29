@@ -41,14 +41,19 @@ class EditorRightPanel extends StatefulWidget {
 
 class _EditorRightPanelState extends State<EditorRightPanel> {
   int _tabIndex = 0;
-  int? _filterIndex; // null = follow selection, otherwise index into outlineFilterLabels
+  int? _filterIndex;
+  final GlobalKey _filterBtnKey = GlobalKey();
   static const _tabs = ['大纲', '卡片', '图谱'];
 
   void _showFilterMenu() {
     if (widget.outlineFilterLabels.isEmpty) return;
+    final box = _filterBtnKey.currentContext!.findRenderObject() as RenderBox;
+    final off = box.localToGlobal(Offset.zero);
     showMenu<int>(
       context: context,
-      position: const RelativeRect.fromLTRB(800, 400, 900, 400),
+      position: RelativeRect.fromLTRB(
+          off.dx - 80, off.dy + box.size.height + 4,
+          off.dx + box.size.width, off.dy + box.size.height + 4),
       elevation: 8, color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg),
         side: const BorderSide(color: AppColors.outlineVariant)),
@@ -133,6 +138,7 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             const Text('快速查看', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
                 letterSpacing: 0.6, color: AppColors.outline)),
             InkWell(
+              key: _filterBtnKey,
               onTap: _showFilterMenu,
               borderRadius: BorderRadius.circular(4),
               child: Padding(padding: const EdgeInsets.all(2),
@@ -144,39 +150,51 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
         const SizedBox(height: 8),
         // Outline preview — synced content
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Stack(children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Stack(children: [
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.outlineVariant, width: 0.3),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(widget.outlineContent,
+                      style: const TextStyle(fontFamily: 'Source Serif 4', fontSize: 13,
+                          height: 1.6, color: AppColors.onSurfaceVariant)),
+                  ),
                 ),
-                child: SingleChildScrollView(
-                  child: Text(widget.outlineContent,
-                    style: const TextStyle(fontFamily: 'Source Serif 4', fontSize: 13,
-                        height: 1.6, color: AppColors.onSurfaceVariant)),
+                // Expand button at bottom-right
+                Positioned(
+                  right: 4, bottom: 4,
+                  child: InkWell(
+                    onTap: widget.onToggleQuickView,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(padding: const EdgeInsets.all(4),
+                      child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
+                          size: 16, color: AppColors.outline)),
+                  ),
                 ),
-              ),
-              // Expand button at bottom-right
-              Positioned(
-                right: 4, bottom: 4,
-                child: InkWell(
-                  onTap: widget.onToggleQuickView,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(padding: const EdgeInsets.all(4),
-                    child: Icon(widget.quickViewExpanded ? Icons.close_fullscreen : Icons.open_in_full,
-                        size: 16, color: AppColors.outline)),
-                ),
-              ),
-            ]),
+              ]),
+            ),
           ),
         ),
-        // Function grid — hidden when expanded
-        if (!widget.quickViewExpanded) ...[
+        // Function grid — animated hide when expanded
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          alignment: Alignment.topCenter,
+          child: widget.quickViewExpanded
+              ? const SizedBox.shrink()
+              : Column(mainAxisSize: MainAxisSize.min, children: [
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
@@ -198,7 +216,8 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
               ],
             ),
           ),
-        ],
+          ]),
+        ),
         // Settings — always visible
         Container(
           decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineVariant, width: 0.3))),
