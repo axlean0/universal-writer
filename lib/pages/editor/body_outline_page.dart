@@ -147,7 +147,7 @@ class BodyOutlinePageState extends State<BodyOutlinePage> {
     return Container(
       color: AppColors.background,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
+        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 672),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

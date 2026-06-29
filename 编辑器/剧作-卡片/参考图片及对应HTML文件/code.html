@@ -1,0 +1,424 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>书架 - 创作者空间</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#c8f17a",
+                        "on-background": "#1a1c1b",
+                        "on-surface-variant": "#43474c",
+                        "background": "#faf9f7",
+                        "on-tertiary-fixed": "#291802",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#364e00",
+                        "on-primary-container": "#96a9be",
+                        "outline-variant": "#c4c6cd",
+                        "tertiary-fixed": "#ffddb7",
+                        "on-primary": "#ffffff",
+                        "primary": "#162839",
+                        "inverse-primary": "#b5c8df",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-secondary-container": "#4e6e00",
+                        "primary-fixed": "#d1e4fb",
+                        "secondary": "#496800",
+                        "surface-dim": "#dadad8",
+                        "outline": "#74777d",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f1f1ef",
+                        "primary-container": "#2c3e50",
+                        "surface-bright": "#faf9f7",
+                        "tertiary-container": "#4e381c",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "tertiary": "#362308",
+                        "inverse-surface": "#2f3130",
+                        "on-tertiary-container": "#c1a17d",
+                        "on-surface": "#1a1c1b",
+                        "on-primary-fixed-variant": "#36485b",
+                        "surface-container-high": "#e9e8e6",
+                        "surface-container-low": "#f4f3f1",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-primary-fixed": "#091d2e",
+                        "primary-fixed-dim": "#b5c8df",
+                        "secondary-fixed-dim": "#add461",
+                        "surface-tint": "#4e6073",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container": "#efeeec",
+                        "surface": "#faf9f7",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#131f00",
+                        "secondary-fixed": "#c8f17a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section_margin": "48px",
+                        "sidebar_width": "260px",
+                        "safe_padding": "32px",
+                        "container_max_width": "1200px",
+                        "stack_sm": "8px",
+                        "grid_gutter": "24px",
+                        "stack_md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-reading": ["Source Serif 4"],
+                        "body-ui": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "display-title": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-reading": ["18px", {"lineHeight": "30px", "fontWeight": "400"}],
+                        "body-ui": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "display-title": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .book-card-shadow:hover {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .mobile-sidebar-hidden { transform: translateX(-100%); }
+            .mobile-sidebar-visible { transform: translateX(0); }
+        }
+        .sketch-pill {
+            border-radius: 9999px;
+            border: 1.5px solid #74777d;
+        }
+    </style>
+</head>
+<body class="font-body-ui text-on-surface">
+<!-- Mobile Navigation Overlay -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Navigation Drawer -->
+<aside class="w-sidebar_width h-full fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 flex flex-col sidebar-transition md:mobile-sidebar-visible mobile-sidebar-visible" id="mainSidebar">
+<div class="p-safe_padding flex flex-col h-full">
+<!-- Profile Header -->
+<div class="mb-10 flex items-center gap-4">
+<button class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors duration-200 flex-shrink-0">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+</button>
+<span class="text-headline-lg text-on-surface font-bold">创作一号</span>
+</div>
+<!-- Nav Links -->
+<nav class="flex-1 space-y-2">
+<!-- Switcher -->
+<div class="flex p-1 bg-surface-container-low rounded-full mb-6">
+<button class="flex-1 py-2 text-body-reading text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">正文</button>
+<button class="flex-1 py-2 text-body-reading font-bold bg-white shadow-sm rounded-full text-primary transition-colors">剧作</button>
+</div>
+<!-- New Button -->
+<div class="mb-6">
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-primary text-on-primary rounded-xl hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+<span class="text-body-ui font-bold">新建</span>
+<span class="material-symbols-outlined" style="font-size: 18px;">keyboard_arrow_down</span>
+</button>
+</div>
+<!-- Outline List -->
+<div class="space-y-1">
+<!-- Volume 1 -->
+<div>
+<button class="w-full flex items-center gap-2 px-3 py-2 text-on-surface font-bold hover:bg-surface-container-low rounded-lg transition-colors">
+<span class="material-symbols-outlined text-outline" style="font-size: 20px;">expand_more</span>
+<span class="text-body-ui">第一卷</span>
+</button>
+<div class="ml-6 mt-1 space-y-1">
+<a class="block px-3 py-2 text-body-ui text-primary bg-secondary-container/20 border-l-2 border-secondary rounded-r-lg" href="#">第一章</a>
+<a class="block px-3 py-2 text-body-ui text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">第二章</a>
+</div>
+</div>
+<!-- Volume 2 -->
+<div class="mt-2">
+<button class="w-full flex items-center gap-2 px-3 py-2 text-on-surface font-bold hover:bg-surface-container-low rounded-lg transition-colors">
+<span class="material-symbols-outlined text-outline" style="font-size: 20px;">chevron_right</span>
+<span class="text-body-ui">第二卷</span>
+</button>
+</div>
+</div>
+</nav>
+</div>
+<button aria-label="Collapse sidebar" class="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface border border-outline-variant rounded-full items-center justify-center shadow-sm hover:bg-surface-container-low transition-colors z-50" onclick="toggleSidebar()">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">chevron_left</span>
+</button>
+</aside>
+<!-- Main Fluid Canvas -->
+<main class="md:ml-[260px] min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-30 w-full px-4 md:px-8 py-3 bg-background/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="max-w-container_max_width mx-auto flex items-center gap-6">
+<!-- Hamburger Menu for Mobile -->
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-opacity duration-200" onclick="toggleSidebar()">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<!-- Pill Search Bar -->
+<div class="relative flex-1 max-w-2xl mx-auto">
+<div class="flex items-center sketch-pill bg-white px-4 py-1.5 shadow-sm">
+<span class="material-symbols-outlined text-outline mr-2" style="font-size: 20px;">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-body-ui outline-none" placeholder="开始查找" type="text">
+</div>
+</div>
+<!-- Right Side Icons -->
+<div class="flex items-center gap-1 md:gap-4 text-on-surface-variant">
+
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">delete</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">history</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full"><span class="material-symbols-outlined" style="font-size: 22px;">more_vert</span></button>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex flex-1 relative">
+<!-- Editor Pane Placeholder -->
+<div class="flex-1 bg-surface-container-low flex flex-col overflow-hidden">
+<!-- Header Section -->
+<div class="px-8 py-6 bg-surface border-b border-outline-variant/30">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<h1 class="text-headline-lg text-on-surface font-bold">剧作 / 卡片库</h1>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+<span class="text-label-caps text-on-surface-variant">角色 · 第一卷</span>
+<span class="material-symbols-outlined text-outline" style="font-size: 14px;">close</span>
+</div>
+</div>
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg">
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">view_agenda</span></button>
+<button class="p-1.5 bg-white shadow-sm rounded transition-colors text-primary"><span class="material-symbols-outlined" style="font-size: 20px;">grid_view</span></button>
+<button class="p-1.5 hover:bg-white rounded transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">view_module</span></button>
+</div>
+</div>
+</div>
+<!-- Card List Area -->
+<div class="flex-1 overflow-y-auto p-8">
+<div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+<!-- Character Card -->
+<div class="bg-white p-5 rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-lg transition-all group">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-label-caps rounded">角色</span>
+</div>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+</div>
+<h3 class="text-headline-lg-mobile font-bold text-on-surface mb-2">林风</h3>
+<p class="text-body-ui text-on-surface-variant line-clamp-2 mb-4">出身于青云镇的平凡少年，身怀不为人知的上古血脉，性格坚毅，重情重义。</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">主角</span>
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">剑修</span>
+</div>
+<div class="pt-3 border-t border-outline-variant/20 flex items-center gap-2 text-label-caps text-outline">
+<span class="material-symbols-outlined" style="font-size: 14px;">menu_book</span>
+<span class="">关联：第一章、第三章</span>
+</div>
+</div>
+<!-- Setting Card -->
+<div class="bg-white p-5 rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-lg transition-all group">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="px-2 py-0.5 bg-secondary-container/50 text-secondary text-label-caps rounded">设定</span>
+</div>
+<span class="material-symbols-outlined text-outline">star</span>
+</div>
+<h3 class="text-headline-lg-mobile font-bold text-on-surface mb-2">苍云大陆</h3>
+<p class="text-body-ui text-on-surface-variant line-clamp-2 mb-4">故事的核心世界，分为九州四海，灵气充沛，是修行者的乐土，但也潜伏着危机。</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">核心世界</span>
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">地理</span>
+</div>
+<div class="pt-3 border-t border-outline-variant/20 flex items-center gap-2 text-label-caps text-outline">
+<span class="material-symbols-outlined" style="font-size: 14px;">menu_book</span>
+<span class="">关联：序章</span>
+</div>
+</div>
+<!-- Item Card -->
+<div class="bg-white p-5 rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-lg transition-all group">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed-variant text-label-caps rounded">道具</span>
+</div>
+<span class="material-symbols-outlined text-outline">star</span>
+</div>
+<h3 class="text-headline-lg-mobile font-bold text-on-surface mb-2">九幽冥石</h3>
+<p class="text-body-ui text-on-surface-variant line-clamp-2 mb-4">通体漆黑，散发着森冷寒气，传闻是通往九幽之地的钥匙，蕴含强大的灵魂力量。</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">神器</span>
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">关键道具</span>
+</div>
+<div class="pt-3 border-t border-outline-variant/20 flex items-center gap-2 text-label-caps text-outline">
+<span class="material-symbols-outlined" style="font-size: 14px;">menu_book</span>
+<span class="">关联：第十二章</span>
+</div>
+</div>
+<!-- Plot Card -->
+<div class="bg-white p-5 rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-lg transition-all group">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container text-label-caps rounded">情节</span>
+</div>
+<span class="material-symbols-outlined text-outline">star</span>
+</div>
+<h3 class="text-headline-lg-mobile font-bold text-on-surface mb-2">青云镇之变</h3>
+<p class="text-body-ui text-on-surface-variant line-clamp-2 mb-4">神秘黑衣人夜袭青云镇，林家惨遭灭门，林风在老仆的保护下死里逃生。</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">转折点</span>
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[11px] rounded-full">第一卷</span>
+</div>
+<div class="pt-3 border-t border-outline-variant/20 flex items-center gap-2 text-label-caps text-outline">
+<span class="material-symbols-outlined" style="font-size: 14px;">menu_book</span>
+<span class="">关联：第二章</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Batch Management Bar -->
+<div class="px-8 py-4 bg-surface border-t border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="text-body-ui font-bold text-primary">已选择 1 项</span>
+<div class="h-4 w-px bg-outline-variant/30"></div>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+<span class="text-label-caps font-bold">删除</span>
+</button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">star</span>
+<span class="text-label-caps font-bold">收藏</span>
+</button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">label</span>
+<span class="text-label-caps font-bold">标签</span>
+</button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">drive_file_move</span>
+<span class="text-label-caps font-bold">分组</span>
+</button>
+</div>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-full text-body-ui font-bold hover:opacity-90 transition-opacity">完成管理</button>
+</div>
+</div>
+<aside class="w-sidebar_width border-l border-outline-variant/30 flex flex-col py-4 bg-surface-container-lowest relative">
+<button aria-label="Collapse right sidebar" class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface border border-outline-variant/30 rounded-full flex items-center justify-center shadow-sm hover:bg-surface-container-low transition-colors z-50">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">chevron_right</span>
+</button>
+<div class="flex flex-col gap-6 px-4 w-full">
+<!-- Top Section: Segmented Control -->
+<div class="flex p-1 bg-surface-container-low rounded-full">
+<button class="flex-1 py-1.5 text-label-caps text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">大纲</button>
+<button class="flex-1 py-1.5 text-label-caps font-bold bg-white shadow-sm rounded-full text-primary">卡片</button>
+<button class="flex-1 py-1.5 text-label-caps text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">图谱</button>
+</div>
+<!-- Second Section: New Card Button -->
+<button class="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-on-primary rounded-xl hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+<span class="text-body-ui font-bold">新建卡片</span>
+</button>
+<!-- Third Section: Filter & Grid -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-label-caps text-outline font-bold">快速查找</span>
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">filter_list</span>
+</div>
+<div class="relative">
+<div class="grid grid-cols-2 gap-2 h-48 overflow-y-auto pr-2"><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">12</span><span class="text-[10px] text-outline font-bold">收藏</span></div><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">8</span><span class="text-[10px] text-outline font-bold">角色</span></div><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">15</span><span class="text-[10px] text-outline font-bold">设定</span></div><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">6</span><span class="text-[10px] text-outline font-bold">道具</span></div><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">20</span><span class="text-[10px] text-outline font-bold">情节</span></div><div class="h-20 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-col items-center justify-center p-2 hover:bg-white transition-colors cursor-pointer"><span class="text-body-ui font-bold text-primary">4</span><span class="text-[10px] text-outline font-bold">自定义</span></div></div>
+<!-- Scrollbar indicator -->
+<div class="absolute right-0 top-0 w-1 h-full bg-surface-container-high rounded-full">
+<div class="w-full h-1/3 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Fourth Section: Functional Grid Rows -->
+<div class="pt-2 border-t border-outline-variant/30"><div class="grid grid-cols-2 gap-1"><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">fullscreen</span><span class="text-label-caps font-bold">全屏</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">self_improvement</span><span class="text-label-caps font-bold">专注</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">tune</span><span class="text-label-caps font-bold">管理</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">link</span><span class="text-label-caps font-bold">关联</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">visibility</span><span class="text-label-caps font-bold">显示</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">lock</span><span class="text-label-caps font-bold">只读</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">save</span><span class="text-label-caps font-bold">保存</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">more_horiz</span><span class="text-label-caps font-bold">更多</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="text-body-ui font-bold">1,240</span><span class="text-label-caps font-bold">字数</span></button><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="text-body-ui font-bold">00:45</span><span class="text-label-caps font-bold">时长</span></button></div></div>
+</div>
+<div class="mt-auto pt-4 flex justify-center border-t border-outline-variant/30 w-full"><button class="flex flex-col items-center gap-1 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"><span class="material-symbols-outlined" style="font-size: 20px;">settings</span><span class="text-label-caps font-bold">设置</span></button></div></aside>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-background border-t border-outline-variant px-2 z-50 rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-primary font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<span class="text-[10px] mt-1">创作</span>
+</a>
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] mt-1">创作</span>
+</button>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[10px] mt-1">文件</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] mt-1">设置</span>
+</a>
+</nav>
+<script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('mobile-sidebar-hidden')) {
+                sidebar.classList.remove('mobile-sidebar-hidden');
+                sidebar.classList.add('mobile-sidebar-visible');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('mobile-sidebar-hidden');
+                sidebar.classList.remove('mobile-sidebar-visible');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Search Input focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            const pill = searchInput.closest('.sketch-pill');
+            if(pill) {
+                pill.classList.add('border-primary');
+                pill.classList.add('ring-1');
+                pill.classList.add('ring-primary/20');
+            }
+        });
+        searchInput.addEventListener('blur', () => {
+            const pill = searchInput.closest('.sketch-pill');
+            if(pill) {
+                pill.classList.remove('border-primary');
+                pill.classList.remove('ring-1');
+                pill.classList.remove('ring-primary/20');
+            }
+        });
+    </script>
+
+
+</body></html>
