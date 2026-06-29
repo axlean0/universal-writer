@@ -29,7 +29,10 @@
       "Bash(unzip -p \"编辑器/确认书.docx\" word/document.xml)",
       "Bash(unzip -p \"编辑器/编辑器结构书/编辑器数据结构补充说明.docx\" word/document.xml)",
       "Bash(unzip -p \"编辑器/剧作-大纲/剧作-大纲结构书.docx\" word/document.xml)",
-      "Bash(unzip -p \"编辑器/正文-卡片/正文-卡片结构书.docx\" word/document.xml)"
+      "Bash(unzip -p \"编辑器/正文-卡片/正文-卡片结构书.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/剧作-卡片/剧作-卡片结构书.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/剧作-卡片/剧作-卡片补充说明.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/剧作-卡片/评估回复.docx\" word/document.xml)"
     ],
     "additionalDirectories": [
       "e:\\ty002\\lib"

@@ -11,6 +11,7 @@ class EditorRightPanel extends StatefulWidget {
   final VoidCallback? onUndo;
   final VoidCallback? onRedo;
   final VoidCallback? onSelectBookOutline;
+  final ValueChanged<int>? onTabChanged;
   final bool isReadOnly;
   final bool quickViewExpanded;
   final VoidCallback? onToggleQuickView;
@@ -26,7 +27,7 @@ class EditorRightPanel extends StatefulWidget {
     super.key,
     this.onToggleCollapse, this.onToggleReadOnly, this.onToggleFullscreen,
     this.onToggleFocus, this.onSave, this.onUndo, this.onRedo,
-    this.onSelectBookOutline,
+    this.onSelectBookOutline, this.onTabChanged,
     this.isReadOnly = false, this.quickViewExpanded = false, this.onToggleQuickView,
     this.wordCount = 0, this.elapsedSeconds = 0,
     this.canUndo = false, this.canRedo = false,
@@ -181,7 +182,7 @@ class _EditorRightPanelState extends State<EditorRightPanel> {
             child: Row(children: List.generate(3, (i) {
               final sel = i == _tabIndex;
               return Expanded(child: GestureDetector(
-                onTap: () => setState(() => _tabIndex = i),
+                onTap: () { setState(() => _tabIndex = i); widget.onTabChanged?.call(i); },
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(

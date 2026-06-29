@@ -8,6 +8,7 @@ import '../../widgets/editor/editor_top_bar.dart';
 import '../../widgets/editor/editor_right_panel.dart';
 import 'body_outline_page.dart';
 import 'drama_outline_page.dart';
+import 'drama_card_page.dart';
 
 class EditorShell extends StatefulWidget {
   final String bookId;
@@ -24,6 +25,7 @@ class _EditorShellState extends State<EditorShell> {
   bool _readOnly = false;
   bool _quickViewExpanded = false;
   EditorMode _editorMode = EditorMode.body;
+  int _rightPanelTab = 0; // 0=大纲, 1=卡片, 2=图谱
 
   String? _activeChapterId;
   String? _activeVolumeId; // for drama mode — volume selection independent of chapter
@@ -47,6 +49,34 @@ class _EditorShellState extends State<EditorShell> {
   void _selectBook() => setState(() {
     _activeChapterId = null; _activeVolumeId = null;
   });
+
+  Widget _buildCenterEditor() {
+    // 剧作 + 卡片 tab → card manager
+    if (_editorMode == EditorMode.drama && _rightPanelTab == 1) {
+      return const DramaCardPage();
+    }
+    // 正文 → text editor
+    if (_editorMode == EditorMode.body) {
+      if (_activeChapter != null) {
+        return BodyOutlinePage(
+          key: _editorKey,
+          chapter: _activeChapter!,
+          readOnly: _readOnly,
+          onWordCountChanged: (c) => setState(() => _wordCount = c),
+          onUndoRedoChanged: (v) => setState(() {
+            _canUndo = _editorKey.currentState?.canUndo ?? false;
+            _canRedo = _editorKey.currentState?.canRedo ?? false;
+          }),
+        );
+      }
+      return const Center(child: Text('请选择一个章节开始写作',
+          style: TextStyle(color: AppColors.outline, fontSize: 15)));
+    }
+    // 剧作 + 其他 → drama outline
+    return DramaOutlinePage(
+      chapter: _activeChapter, volume: _activeVolume, readOnly: _readOnly,
+    );
+  }
 
   // Stats passed from BodyOutlinePage to RightPanel
   int _wordCount = 0;
@@ -152,25 +182,7 @@ class _EditorShellState extends State<EditorShell> {
               Expanded(
                 child: Row(children: [
                   Expanded(
-                    child: _editorMode == EditorMode.body
-                        ? (_activeChapter != null
-                            ? BodyOutlinePage(
-                                key: _editorKey,
-                                chapter: _activeChapter!,
-                                readOnly: _readOnly,
-                                onWordCountChanged: (c) => setState(() => _wordCount = c),
-                                onUndoRedoChanged: (v) => setState(() {
-                                  _canUndo = _editorKey.currentState?.canUndo ?? false;
-                                  _canRedo = _editorKey.currentState?.canRedo ?? false;
-                                }),
-                              )
-                            : const Center(child: Text('请选择一个章节开始写作',
-                                style: TextStyle(color: AppColors.outline, fontSize: 15))))
-                        : DramaOutlinePage(
-                            chapter: _activeChapter,
-                            volume: _activeVolume,
-                            readOnly: _readOnly,
-                          ),
+                    child: _buildCenterEditor(),
                   ),
                   if (_rightVisible)
                     SizedBox(
@@ -183,6 +195,7 @@ class _EditorShellState extends State<EditorShell> {
                         outlineContent: _outlineContent,
                         outlineFilterLabels: _outlineFilterLabels,
                         onSelectBookOutline: _selectBook,
+                        onTabChanged: (i) => setState(() => _rightPanelTab = i),
                         onUndo: () { _editorKey.currentState?.handleUndo(); },
                         onRedo: () { _editorKey.currentState?.handleRedo(); },
                         onToggleReadOnly: () => setState(() => _readOnly = !_readOnly),
