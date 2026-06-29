@@ -26,7 +26,9 @@
       "Bash(sed 's/^[[:space:]]*//')",
       "Bash(unzip -p \"编辑器/编辑器结构书/编辑器结构书.docx\" word/document.xml)",
       "Bash(unzip -p \"编辑器/正文-大纲/正文-大纲界面结构书.docx\" word/document.xml)",
-      "Bash(unzip -p \"编辑器/确认书.docx\" word/document.xml)"
+      "Bash(unzip -p \"编辑器/确认书.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/编辑器结构书/编辑器数据结构补充说明.docx\" word/document.xml)",
+      "Bash(unzip -p \"编辑器/剧作-大纲/剧作-大纲结构书.docx\" word/document.xml)"
     ],
     "additionalDirectories": [
       "e:\\ty002\\lib"

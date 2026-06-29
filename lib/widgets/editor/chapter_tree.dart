@@ -14,16 +14,20 @@ String _toCn(int n) {
 
 class ChapterTree extends StatefulWidget {
   final String? activeChapterId;
+  final EditorMode initialMode;
   final ValueChanged<Chapter> onSelectChapter;
   final VoidCallback onBack;
   final VoidCallback? onChanged;
+  final ValueChanged<EditorMode>? onModeChanged;
 
   const ChapterTree({
     super.key,
     this.activeChapterId,
+    this.initialMode = EditorMode.body,
     required this.onSelectChapter,
     required this.onBack,
     this.onChanged,
+    this.onModeChanged,
   });
 
   @override
@@ -31,8 +35,14 @@ class ChapterTree extends StatefulWidget {
 }
 
 class _ChapterTreeState extends State<ChapterTree> {
-  EditorMode _mode = EditorMode.body;
+  late EditorMode _mode;
   final Set<String> _expandedVolumeIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _mode = widget.initialMode;
+  }
 
   void _showNewMenu() {
     showMenu<String>(
@@ -275,7 +285,10 @@ class _ChapterTreeState extends State<ChapterTree> {
   Widget _switcherBtn(String label, EditorMode mode) {
     final sel = _mode == mode;
     return Expanded(child: GestureDetector(
-      onTap: () => setState(() => _mode = mode),
+      onTap: () {
+        setState(() => _mode = mode);
+        widget.onModeChanged?.call(mode);
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(

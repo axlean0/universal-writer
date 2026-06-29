@@ -6,6 +6,7 @@ import '../../widgets/editor/chapter_tree.dart';
 import '../../widgets/editor/editor_top_bar.dart';
 import '../../widgets/editor/editor_right_panel.dart';
 import 'body_outline_page.dart';
+import 'drama_outline_page.dart';
 
 class EditorShell extends StatefulWidget {
   final String bookId;
@@ -21,9 +22,17 @@ class _EditorShellState extends State<EditorShell> {
   bool _rightVisible = true;
   bool _readOnly = false;
   bool _quickViewExpanded = false;
+  EditorMode _editorMode = EditorMode.body;
 
   String? _activeChapterId;
   Chapter? get _activeChapter => EditorRepository.i.chapterById(_activeChapterId ?? '');
+  Volume? get _activeVolume {
+    if (_activeChapter == null) return null;
+    for (final v in EditorRepository.i.current.volumes) {
+      if (v.chapters.any((c) => c.id == _activeChapterId)) return v;
+    }
+    return null;
+  }
 
   // Stats passed from BodyOutlinePage to RightPanel
   int _wordCount = 0;
@@ -76,9 +85,11 @@ class _EditorShellState extends State<EditorShell> {
               width: AppSpacing.sidebarWidth,
               child: ChapterTree(
                 activeChapterId: _activeChapterId,
+                initialMode: _editorMode,
                 onSelectChapter: _selectChapter,
                 onBack: () => Navigator.of(context).pop(),
                 onChanged: () => setState(() {}),
+                onModeChanged: (mode) => setState(() => _editorMode = mode),
               ),
             ),
           if (!_leftVisible)
@@ -98,20 +109,26 @@ class _EditorShellState extends State<EditorShell> {
               Expanded(
                 child: Row(children: [
                   Expanded(
-                    child: _activeChapter != null
-                        ? BodyOutlinePage(
-                            key: _editorKey,
-                            chapter: _activeChapter!,
+                    child: _editorMode == EditorMode.body
+                        ? (_activeChapter != null
+                            ? BodyOutlinePage(
+                                key: _editorKey,
+                                chapter: _activeChapter!,
+                                readOnly: _readOnly,
+                                onWordCountChanged: (c) => setState(() => _wordCount = c),
+                                onTimeChanged: (t) => setState(() => _elapsedTime = t),
+                                onUndoRedoChanged: (v) => setState(() {
+                                  _canUndo = _editorKey.currentState?.canUndo ?? false;
+                                  _canRedo = _editorKey.currentState?.canRedo ?? false;
+                                }),
+                              )
+                            : const Center(child: Text('请选择一个章节开始写作',
+                                style: TextStyle(color: AppColors.outline, fontSize: 15))))
+                        : DramaOutlinePage(
+                            chapter: _activeChapter,
+                            volume: _activeVolume,
                             readOnly: _readOnly,
-                            onWordCountChanged: (c) => setState(() => _wordCount = c),
-                            onTimeChanged: (t) => setState(() => _elapsedTime = t),
-                            onUndoRedoChanged: (v) => setState(() {
-                              _canUndo = _editorKey.currentState?.canUndo ?? false;
-                              _canRedo = _editorKey.currentState?.canRedo ?? false;
-                            }),
-                          )
-                        : const Center(child: Text('请选择一个章节开始写作',
-                            style: TextStyle(color: AppColors.outline, fontSize: 15))),
+                          ),
                   ),
                   if (_rightVisible)
                     SizedBox(

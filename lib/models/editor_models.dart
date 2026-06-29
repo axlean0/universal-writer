@@ -7,7 +7,8 @@ enum RightPanelMode { outline, card, graph } // 大纲 / 卡片 / 图谱
 class Chapter {
   final String id;
   String title;
-  String body;
+  String body;          // 正文内容
+  String dramaOutline;  // 剧作章纲
   int wordCount;
   final int order;
 
@@ -15,6 +16,7 @@ class Chapter {
     required this.id,
     required this.title,
     this.body = '',
+    this.dramaOutline = '',
     this.wordCount = 0,
     required this.order,
   });
@@ -25,12 +27,14 @@ class Volume {
   final String id;
   String title;
   final List<Chapter> chapters;
+  String dramaOutline;  // 剧作卷纲
   final int order;
 
   Volume({
     required this.id,
     required this.title,
     this.chapters = const [],
+    this.dramaOutline = '',
     required this.order,
   });
 }
@@ -40,12 +44,14 @@ class EditorBook {
   final String id;
   final String title;
   final List<Volume> volumes;
-  String outlinePreview;
+  String outlinePreview;  // 正文大纲预览（保留兼容）
+  String dramaOutline;    // 剧作总纲
 
   EditorBook({
     required this.id,
     required this.title,
     this.volumes = const [],
     this.outlinePreview = '',
+    this.dramaOutline = '',
   });
 }
